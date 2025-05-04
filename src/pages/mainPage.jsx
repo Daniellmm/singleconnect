@@ -143,7 +143,7 @@ const HomePage = () => {
                 </div>
 
                 <div className='bg-black flex  h-[2px] mx-10'></div>
-                <div className='bg-white h-20 px-10 pt-4 lg:pb-0 pb-24  flex flex-col lg:flex-row justify-between items-center lg:px-20'>
+                <div className='bg-white h-20 gap-y-3 px-10 pt-4 lg:pb-0 pb-24  flex flex-col lg:flex-row justify-between items-center lg:px-20'>
                     <div>
                         <p className='text-center'>Copyright © 2025 Singles Connect. All Rights Reserved.</p>
                     </div>
