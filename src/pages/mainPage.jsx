@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import NavBar from '../components/navBar'
 import BackImg from '../assets/mainbg.jpg';
 import WINLOS from '../assets/winlos.png'
@@ -10,10 +10,21 @@ import CountdownTimer from '../components/countdown';
 import VideoPlayer from '../components/videoPlayer';
 
 import { FaFacebookF, FaInstagram } from "react-icons/fa";
-import { IoMdClose } from "react-icons/io";
 
 
 const HomePage = () => {
+
+    const scrollToRegister = () => {
+        const registerSection = document.getElementById("register");
+        
+        if (registerSection) {
+          registerSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      };
+
     return (
         <>
             <NavBar />
@@ -57,9 +68,11 @@ const HomePage = () => {
                     </div>
 
                     <div className='pt-10'>
-                        <button className='bg-pink-600 animate-bounce text-white border-[2px] rounded-lg font-bold text-lg md:text-[14px] py-2 px-4 border-pink-600 hover:bg-white hover:text-pink-600 transition duration-500'>
-                            Register Now
-                        </button>
+                            <button 
+                            onClick={scrollToRegister}
+                            className='bg-pink-600 animate-bounce text-white border-[2px] rounded-lg font-bold text-lg md:text-[14px] py-2 px-4 border-pink-600 hover:bg-white hover:text-pink-600 transition duration-500'>
+                                Register Now
+                            </button>
                     </div>
 
                 </div>
