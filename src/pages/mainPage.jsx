@@ -2,6 +2,7 @@ import React, { useRef } from 'react'
 import NavBar from '../components/navBar'
 import BackImg from '../assets/mainbg.jpg';
 import WINLOS from '../assets/winlos.png'
+import DADDY from '../assets/ajetomobi.png'
 import SINGLE from '../assets/singles.png'
 import SC from '../assets/sc.png'
 import CONNECT from '../assets/connect.png'
@@ -16,14 +17,14 @@ const HomePage = () => {
 
     const scrollToRegister = () => {
         const registerSection = document.getElementById("register");
-        
+
         if (registerSection) {
-          registerSection.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
+            registerSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
-      };
+    };
 
     return (
         <>
@@ -34,7 +35,7 @@ const HomePage = () => {
                 <div className="absolute inset-0 bg-black opacity-90 z-0"></div>
 
                 <div className='relative z-10 flex flex-col justify-center lg:px-14 items-center h-full '>
-                    <h1 className='text-white text-center lg:leading-[130px] text-4xl lg:text-[120px] font-bold'>
+                    <h1 className='text-white text-center lg:leading-[100px] text-4xl lg:text-[90px] font-bold'>
                         Singles Connect is Here Again
                     </h1>
                     <p className='text-white text-center lg:text-2xl pt-4'>
@@ -52,27 +53,35 @@ const HomePage = () => {
                     <p className='lg:text-2xl text-sm text-center font-semibold text-pink-600'>Welcome To Singles Connect Offical Website</p>
 
                     <div className='lg:pt-9 pt-5 px-5 flex justify-center'>
-                        <h1 className='lg:text-7xl text-2xl text-center font-bold lg:leading-[35px]'>Are you ready for a Lasting <br /> <span className='text-black/10 tracking-[20px] text-3xl lg:text-8xl'>EXPIRENCE</span></h1>
+                        <h1 className='lg:text-7xl text-2xl text-center font-bold lg:leading-[35px]'>Are you ready for a Lasting <br /> <span className='text-black/10 tracking-[15px] lg:tracking-[20px] text-3xl lg:text-8xl'>EXPERIENCE</span></h1>
                     </div>
 
                     <div className='flex justify-center items-center w-20 h-[3px] rounded-xl mt-4 animate-ping bg-pink-600'></div>
 
                     <div className='lg:px-44 pt-10'>
                         <p className='text-xl text-center leading-relaxed text-gray-500'>
-                            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Iusto enim debitis suscipit molestias,
-                            ut est incidunt vero odio rem necessitatibus tempore, non quae quasi id?
-                            At voluptate enim reiciendis! Eligendi quia consectetur voluptas quo doloremque,
-                            eius incidunt tempore eveniet amet nobis? Dolorem dolore quam, porro commodi ducimus ipsam magni aspernatur beatae necessitatibus ipsa repellat,
-                            molestias dolores ut nisi voluptates.
+                            Singles Connect is a powerful annual gathering hosted by the Men of Issachar Vision—a ministry
+                            dedicated to raising men and women of wisdom, purpose, and discernment in the times we live in.
+                            <br /> <br />
+                            This vibrant meeting is designed for Christian singles who desire meaningful relationships rooted in God's truth.
+                            It’s more than just a networking event—it’s a space for growth, connection, and purpose. Through heartfelt teachings, panel discussions,
+                            and Spirit-led conversations, participants gain clarity on God’s design for love, marriage, and personal wholeness.
+                            <br /> <br />
+                            Whether you're seeking to deepen your understanding of godly relationships, build lasting friendships, or prepare for a Christ-centered marriage,
+                            Singles Connect is your opportunity to engage with like-minded believers in a refreshing and uplifting environment.
+                            <br /> <br />
+                            We believe that when singles are equipped with vision and direction, they become empowered to make godly choices that shape their future and impact their world.
+                            <br /> <br />
+                            Come discover, connect, and be transformed.
                         </p>
                     </div>
 
                     <div className='pt-10'>
-                            <button 
+                        <button
                             onClick={scrollToRegister}
                             className='bg-pink-600 animate-bounce text-white border-[2px] rounded-lg font-bold text-lg md:text-[14px] py-2 px-4 border-pink-600 hover:bg-white hover:text-pink-600 transition duration-500'>
-                                Register Now
-                            </button>
+                            Register Now
+                        </button>
                     </div>
 
                 </div>
@@ -100,14 +109,14 @@ const HomePage = () => {
                     <div className='flex flex-col lg:flex-row justify-center items-center gap-20 pt-20'>
 
                         <div className=' flex flex-col justify-center items-center gap-5'>
-                            <img src={WINLOS} className='lg:h-[500px] rounded-full' alt="" />
+                            <img src={DADDY} className='lg:h-[400px] rounded-full' alt="" />
                             <h1 className='text-2xl text-white font-bold'>Rev Samson Ajetomobi</h1>
                             <p className='text-lg text-pink-600'>Host</p>
                         </div>
                         <div className=' flex flex-col justify-center items-center gap-5'>
-                            <img src={WINLOS} className='lg:h-[500px] rounded-full' alt="" />
-                            <h1 className='text-2xl text-white font-bold'>Rev Samson Ajetomobi</h1>
-                            <p className='text-lg text-pink-600'>Host</p>
+                            <img src={WINLOS} className='lg:h-[400px] rounded-full' alt="" />
+                            <h1 className='text-2xl text-white font-bold'>Awinli Ojeikere</h1>
+                            <p className='text-lg text-pink-600'>Guest Minister</p>
                         </div>
 
                     </div>
@@ -155,7 +164,7 @@ const HomePage = () => {
                     </div>
                 </div>
 
-                <div className='bg-black flex  h-[2px] mx-10'></div>
+                <div className='bg-black flex  h-[1px] mx-10'></div>
                 <div className='bg-white h-20 gap-y-3 px-10 pt-4 lg:pb-0 pb-24  flex flex-col lg:flex-row justify-between items-center lg:px-20'>
                     <div>
                         <p className='text-center'>Copyright © 2025 Singles Connect. All Rights Reserved.</p>
