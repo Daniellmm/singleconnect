@@ -35,7 +35,7 @@ const HomePage = () => {
                 <div className="absolute inset-0 bg-black opacity-90 z-0"></div>
 
                 <div className='relative z-10 flex flex-col justify-center lg:px-14 items-center h-full '>
-                    <h1 className='text-white text-center lg:leading-[100px] text-4xl lg:text-[90px] font-bold'>
+                    <h1 className='text-white text-center lg:leading-[100px] text-4xl lg:text-[80px] font-bold'>
                         Singles Connect is Here Again
                     </h1>
                     <p className='text-white text-center lg:text-2xl pt-4'>
