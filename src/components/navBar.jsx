@@ -11,7 +11,6 @@ const NavBar = () => {
 
     const toggleMenu = () => setIsOpen(!isOpen);
 
-    // Array of navigation links for both desktop and mobile
     const navLinks = [
         { name: 'Home', id: 'home', type: 'scroll' },
         { name: 'About S.C.', id: 'about', type: 'scroll' },
@@ -29,16 +28,16 @@ const NavBar = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
     
-    // Set up intersection observer to detect which section is in view
+    
     useEffect(() => {
         const sectionIds = navLinks.filter(link => link.type === 'scroll').map(link => link.id);
         const sectionElements = sectionIds.map(id => document.getElementById(id));
         
         // Configuration for the observer
         const observerOptions = {
-            root: null, // viewport is the root
-            rootMargin: '-30% 0px', // Consider element in view when it's 30% into viewport
-            threshold: 0.1 // Trigger when at least 10% of the element is visible
+            root: null, 
+            rootMargin: '1% 0px', 
+            threshold: 0.6 
         };
         
         const observerCallback = (entries) => {
@@ -57,14 +56,13 @@ const NavBar = () => {
         
         const observer = new IntersectionObserver(observerCallback, observerOptions);
         
-        // Observe all section elements
+        
         sectionElements.forEach(element => {
             if (element) {
                 observer.observe(element);
             }
         });
         
-        // Cleanup function
         return () => {
             sectionElements.forEach(element => {
                 if (element) {
@@ -72,7 +70,7 @@ const NavBar = () => {
                 }
             });
         };
-    }, [navLinks]); // Add navLinks to dependency array
+    }, [navLinks]); 
 
     // Function to handle scrolling to sections
     const scrollToSection = (id, linkName) => {
@@ -124,7 +122,7 @@ const NavBar = () => {
                         smooth={true}
                         duration={500}
                         offset={-70}
-                        className={`bg-transparent border-[2px] rounded-lg font-bold text-lg md:text-[12px] py-2 px-4 border-black ${scrolled ? 'border-black' : 'border-white hover:bg-white hover:text-black'
+                        className={`bg-transparent border-[2px] rounded-lg font-bold text-lg md:text-[12px] py-2 px-4 border-black ${scrolled ? 'border-black' : 'border-white hover:text-black'
                             } hover:bg-pink-600 hover:border-pink-600 hover:text-white transition duration-500 cursor-pointer`}
                     >
                         REGISTER NOW

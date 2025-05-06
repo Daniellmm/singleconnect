@@ -20,6 +20,8 @@ const AdminDashboard = () => {
         email: '',
         message: ''
     });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [responsesPerPage] = useState(10); 
 
     // function to fetch responses from Firestore
     const fetchResponses = async () => {
@@ -36,7 +38,19 @@ const AdminDashboard = () => {
                 const data = docSnapshot.data();
                 const id = docSnapshot.id;
                 
-                // formating the data 
+                // Handle timestamp properly for both formats
+                let timestamp;
+                if (data.timestamp?.timestampValue) {
+                    timestamp = data.timestamp.timestampValue;
+                } else if (data.timestamp instanceof Date) {
+                    timestamp = data.timestamp.toISOString();
+                } else if (data.timestamp) {
+                    timestamp = data.timestamp;
+                } else {
+                    timestamp = new Date().toISOString();
+                }
+                
+                // formatting the data 
                 const formattedResponse = {
                     id: id,
                     data: {
@@ -45,7 +59,7 @@ const AdminDashboard = () => {
                         message: data.message?.stringValue || data.message || 'N/A',
                         phone: data.phone?.stringValue || data.phone || 'N/A'
                     },
-                    timestamp: data.timestamp?.timestampValue || data.timestamp || new Date().toISOString(),
+                    timestamp: timestamp,
                     completed: data.completed || false
                 };
                 
@@ -164,18 +178,73 @@ const AdminDashboard = () => {
         );
     });
 
-    // // load responses on component mount
-    // useEffect(() => {
-    //     fetchResponses();
+    // pagination logic
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    const Pagination = () => {
+        const pageNumbers = [];
         
-    //     // Set up periodic refresh (every 60 seconds)
-    //     const intervalId = setInterval(() => {
-    //         fetchResponses();
-    //     }, 60000);
+        for (let i = 1; i <= Math.ceil(filteredResponses.length / responsesPerPage); i++) {
+            pageNumbers.push(i);
+        }
         
-    //     // clean up interval on component unmount
-    //     return () => clearInterval(intervalId);
-    // }, []);
+        return (
+            <nav className="flex justify-center mt-4">
+                <ul className="flex space-x-2">
+                    {/* Previous button */}
+                    <li>
+                        <button
+                            onClick={() => currentPage > 1 && paginate(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-300'}`}
+                        >
+                            Prev
+                        </button>
+                    </li>
+                    
+                    {/* Page numbers */}
+                    {pageNumbers.map(number => (
+                        <li key={number}>
+                            <button
+                                onClick={() => paginate(number)}
+                                className={`px-3 py-1 rounded ${currentPage === number ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                            >
+                                {number}
+                            </button>
+                        </li>
+                    ))}
+                    
+                    {/* Next button */}
+                    <li>
+                        <button
+                            onClick={() => currentPage < pageNumbers.length && paginate(currentPage + 1)}
+                            disabled={currentPage === pageNumbers.length || pageNumbers.length === 0}
+                            className={`px-3 py-1 rounded ${currentPage === pageNumbers.length || pageNumbers.length === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-300'}`}
+                        >
+                            Next
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        );
+    };
+
+    // Calculate current page data
+    const indexOfLastResponse = currentPage * responsesPerPage;
+    const indexOfFirstResponse = indexOfLastResponse - responsesPerPage;
+    const currentResponses = filteredResponses.slice(indexOfFirstResponse, indexOfLastResponse);
+
+    // load responses on component mount
+    useEffect(() => {
+        fetchResponses();
+        
+        // this is commented out to save Firebase reads i might use it later
+        // const intervalId = setInterval(() => {
+        //     fetchResponses();
+        // }, 60000);
+        
+        // return () => clearInterval(intervalId);
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('adminAuthenticated');
@@ -319,16 +388,6 @@ const AdminDashboard = () => {
                                                 onChange={(e) => setNewParticipant({...newParticipant, phone: e.target.value})}
                                             />
                                         </div>
-                                        {/* <div>
-                                            <label htmlFor="message" className="block text-sm font-medium text-gray-700">Message</label>
-                                            <input
-                                                type="text"
-                                                id="message"
-                                                className="mt-1 block w-full rounded-md border border-gray-900 p-2  shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                                value={newParticipant.message}
-                                                onChange={(e) => setNewParticipant({...newParticipant, message: e.target.value})}
-                                            />
-                                        </div> */}
                                     </div>
                                     <div className="mt-4 flex justify-end">
                                         <button
@@ -370,7 +429,7 @@ const AdminDashboard = () => {
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
-                                            {filteredResponses.map((response, index) => (
+                                            {currentResponses.map((response, index) => (
                                                 <tr key={response.id || index}>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                         {response.data?.name || 'N/A'}
@@ -401,6 +460,9 @@ const AdminDashboard = () => {
                                             ))}
                                         </tbody>
                                     </table>
+                                    
+                                    {/* Pagination component */}
+                                    {!loading && !error && filteredResponses.length > 0 && <Pagination />}
                                 </div>
                             )}
                         </div>
