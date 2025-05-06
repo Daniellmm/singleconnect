@@ -47,7 +47,7 @@ const NavBar = () => {
 
             <div className='flex justify-between items-center'>
                 <div className='flex justify-center font-bold'>
-                    <img src={LOGO} className='h-20 rounded-full' alt="" />
+                    <img src={LOGO} className='h-12 rounded-full' alt="" />
                 </div>
                 <div className='lg:hidden'>
                     <button onClick={toggleMenu}>
@@ -60,7 +60,7 @@ const NavBar = () => {
                             <li
                                 key={link.name}
                                 onClick={() => scrollToSection(link.id, link.name)}
-                                className={`font-semibold text-lg cursor-pointer relative after:content-[''] after:absolute after:h-[2px] after:bg-pink-600 after:w-full after:left-0 after:-bottom-1 ${activeLink === link.name ? 'after:visible' : 'after:invisible'
+                                className={`font-semibold text-md cursor-pointer relative after:content-[''] after:absolute after:h-[2px] after:bg-pink-600 after:w-full after:left-0 after:-bottom-1 ${activeLink === link.name ? 'after:visible' : 'after:invisible'
                                     }`}
                             >
                                 {link.name === 'Dashboard' ? (
@@ -80,7 +80,7 @@ const NavBar = () => {
                         smooth={true}
                         duration={500}
                         offset={-70}
-                        className={`bg-transparent border-[2px] rounded-lg font-bold text-lg md:text-[14px] py-2 px-4 border-black ${scrolled ? 'border-black' : 'border-white hover:bg-white hover:text-black'
+                        className={`bg-transparent border-[2px] rounded-lg font-bold text-lg md:text-[12px] py-2 px-4 border-black ${scrolled ? 'border-black' : 'border-white hover:bg-white hover:text-black'
                             } hover:bg-pink-600 hover:border-pink-600 hover:text-white transition duration-500 cursor-pointer`}
                     >
                         REGISTER NOW
