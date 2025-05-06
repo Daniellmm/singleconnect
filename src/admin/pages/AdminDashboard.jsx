@@ -237,7 +237,6 @@ const AdminDashboard = () => {
     // load responses on component mount
     useEffect(() => {
         fetchResponses();
-        
         // this is commented out to save Firebase reads i might use it later
         // const intervalId = setInterval(() => {
         //     fetchResponses();
@@ -317,7 +316,12 @@ const AdminDashboard = () => {
                         <div className='flex justify-between'>
                             <h2 className="text-lg font-medium text-gray-900">Participant Management</h2>
 
-                            <div className="relative">
+                            
+                        </div>
+                        
+                        {/* Action Buttons */}
+                        <div className="mt-4 justify-between flex space-x-4">
+                        <div className="relative">
                                 <input
                                     type="text"
                                     placeholder="Search participants..."
@@ -331,10 +335,8 @@ const AdminDashboard = () => {
                                     </svg>
                                 </div>
                             </div>
-                        </div>
-                        
-                        {/* Action Buttons */}
-                        <div className="mt-4 flex space-x-4">
+
+                            <div className='flex space-x-4'>
                             <button
                                 onClick={fetchResponses}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -344,10 +346,12 @@ const AdminDashboard = () => {
                             
                             <button
                                 onClick={() => setShowAddForm(!showAddForm)}
-                                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className={`px-4 py-2 bg-green-600 text-white rounded-md ${showAddForm ? 'bg-red-500 hover:bg-red-700 border-red-500 focus:ring-red-700' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500'}  focus:outline-none focus:ring-2 `}
                             >
                                 {showAddForm ? 'Cancel' : 'Add Participant'}
                             </button>
+                            </div>
+                            
                         </div>
                         
                         {/* Add Participant Form */}
@@ -392,7 +396,7 @@ const AdminDashboard = () => {
                                     <div className="mt-4 flex justify-end">
                                         <button
                                             type="submit"
-                                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         >
                                             Save Participant
                                         </button>
@@ -453,7 +457,7 @@ const AdminDashboard = () => {
                                                             onClick={() => updateRegistrationStatus(response.id, !response.completed)}
                                                             className={`px-3 py-1 rounded-md ${response.completed ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
                                                         >
-                                                            {response.completed ? 'Mark Incomplete' : 'Mark Complete'}
+                                                            {response.completed ? 'Registration Incomplete' : 'Registration Complete'}
                                                         </button>
                                                     </td>
                                                 </tr>
