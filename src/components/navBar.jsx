@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { HiMenu, HiX } from 'react-icons/hi';
-import LOGO from '../assets/logo.jpg'
+import { Link as RouterLink } from 'react-router-dom';
 import { Link as ScrollLink } from 'react-scroll';
-
+import LOGO from '../assets/logo.jpg'
 
 const NavBar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +11,16 @@ const NavBar = () => {
 
     const toggleMenu = () => setIsOpen(!isOpen);
 
+    // Array of navigation links for both desktop and mobile
+    const navLinks = [
+        { name: 'Home', id: 'home', type: 'scroll' },
+        { name: 'About S.C.', id: 'about', type: 'scroll' },
+        { name: 'Ministers', id: 'ministers', type: 'scroll' },
+        { name: 'Gallery', id: 'gallery', type: 'scroll' },
+        { name: 'Dashboard', path: '/admin-login', type: 'route' }
+    ];
+
+    // Handle scroll effect for navbar background
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
@@ -18,20 +28,54 @@ const NavBar = () => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
-
-    // Array of navigation links for both desktop and mobile
-    const navLinks = [
-        { name: 'Home', href: '#home', id: 'home' },
-        { name: 'About S.C.', href: '#about', id: 'about' },
-        { name: 'Ministers', href: '#ministers', id: 'ministers' },
-        { name: 'Gallery', href: '#gallery', id: 'gallery' },
-        { name: 'Dashboard', href: '/admin-login', id: '' }
-    ];
+    
+    // Set up intersection observer to detect which section is in view
+    useEffect(() => {
+        const sectionIds = navLinks.filter(link => link.type === 'scroll').map(link => link.id);
+        const sectionElements = sectionIds.map(id => document.getElementById(id));
+        
+        // Configuration for the observer
+        const observerOptions = {
+            root: null, // viewport is the root
+            rootMargin: '-30% 0px', // Consider element in view when it's 30% into viewport
+            threshold: 0.1 // Trigger when at least 10% of the element is visible
+        };
+        
+        const observerCallback = (entries) => {
+            // Filter for only the entries that are currently intersecting
+            const visibleEntries = entries.filter(entry => entry.isIntersecting);
+            
+            if (visibleEntries.length > 0) {
+                // If multiple sections are visible, take the first one (highest in the DOM)
+                const sectionId = visibleEntries[0].target.id;
+                const navItem = navLinks.find(link => link.id === sectionId);
+                if (navItem) {
+                    setActiveLink(navItem.name);
+                }
+            }
+        };
+        
+        const observer = new IntersectionObserver(observerCallback, observerOptions);
+        
+        // Observe all section elements
+        sectionElements.forEach(element => {
+            if (element) {
+                observer.observe(element);
+            }
+        });
+        
+        // Cleanup function
+        return () => {
+            sectionElements.forEach(element => {
+                if (element) {
+                    observer.unobserve(element);
+                }
+            });
+        };
+    }, [navLinks]); // Add navLinks to dependency array
 
     // Function to handle scrolling to sections
     const scrollToSection = (id, linkName) => {
-        if (linkName === 'Dashboard') return; // This will navigate normally
-        
         const target = document.getElementById(id);
         if (target) {
             target.scrollIntoView({ behavior: 'smooth' });
@@ -47,10 +91,10 @@ const NavBar = () => {
 
             <div className='flex justify-between items-center'>
                 <div className='flex justify-center font-bold'>
-                    <img src={LOGO} className='h-12 rounded-full' alt="" />
+                    <img src={LOGO} className='h-12 rounded-full' alt="Logo" />
                 </div>
                 <div className='lg:hidden'>
-                    <button onClick={toggleMenu}>
+                    <button onClick={toggleMenu} aria-label="Toggle menu">
                         {isOpen ? <HiX className='text-3xl' /> : <HiMenu className='text-3xl' />}
                     </button>
                 </div>
@@ -59,14 +103,14 @@ const NavBar = () => {
                         {navLinks.map(link => (
                             <li
                                 key={link.name}
-                                onClick={() => scrollToSection(link.id, link.name)}
-                                className={`font-semibold text-md cursor-pointer relative after:content-[''] after:absolute after:h-[2px] after:bg-pink-600 after:w-full after:left-0 after:-bottom-1 ${activeLink === link.name ? 'after:visible' : 'after:invisible'
+                                onClick={() => link.type === 'scroll' && scrollToSection(link.id, link.name)}
+                                className={`font-semibold text-md cursor-pointer relative after:content-[''] after:absolute after:h-[2px] after:bg-pink-600 after:w-full after:left-0 after:-bottom-1 transition-all duration-300 ${activeLink === link.name ? 'after:visible' : 'after:invisible'
                                     }`}
                             >
-                                {link.name === 'Dashboard' ? (
-                                    <a href={link.href} className="block">
+                                {link.type === 'route' ? (
+                                    <RouterLink to={link.path} className="block">
                                         {link.name}
-                                    </a>
+                                    </RouterLink>
                                 ) : (
                                     <span className="block">{link.name}</span>
                                 )}
@@ -92,13 +136,21 @@ const NavBar = () => {
             {isOpen && (
                 <div className='lg:hidden mt-4 text-black p-4 rounded'>
                     <ul className='flex flex-col space-y-4'>
-                        {navLinks.filter(link => link.name !== 'Dashboard').map(link => (
+                        {navLinks.map(link => (
                             <li 
                                 key={link.name}
-                                onClick={() => scrollToSection(link.id, link.name)}
-                                className='font-semibold text-xl cursor-pointer'
+                                onClick={() => link.type === 'scroll' 
+                                    ? scrollToSection(link.id, link.name) 
+                                    : setIsOpen(false)}
+                                className={`font-semibold text-xl cursor-pointer relative after:content-[''] after:absolute after:h-[2px] after:bg-pink-600 after:w-full after:left-0 after:-bottom-1 ${activeLink === link.name ? 'after:visible' : 'after:invisible'}`}
                             >
-                                {link.name}
+                                {link.type === 'route' ? (
+                                    <RouterLink to={link.path} className="block">
+                                        {link.name}
+                                    </RouterLink>
+                                ) : (
+                                    <span className="block">{link.name}</span>
+                                )}
                             </li>
                         ))}
                         <li className='pt-4'>
