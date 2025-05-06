@@ -21,7 +21,7 @@ const AdminDashboard = () => {
         message: ''
     });
     const [currentPage, setCurrentPage] = useState(1);
-    const [responsesPerPage] = useState(10); 
+    const [responsesPerPage] = useState(5); 
 
     // function to fetch responses from Firestore
     const fetchResponses = async () => {
@@ -448,16 +448,16 @@ const AdminDashboard = () => {
                                                         {new Date(response.timestamp).toLocaleDateString()}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${response.completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                                            {response.completed ? 'Completed' : 'Pending'}
+                                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${response.completed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                            {response.completed ? 'Checked In' : 'Pending'}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                         <button
                                                             onClick={() => updateRegistrationStatus(response.id, !response.completed)}
-                                                            className={`px-3 py-1 rounded-md ${response.completed ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
+                                                            className={`px-3 py-1 rounded-md ${response.completed ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'}`}
                                                         >
-                                                            {response.completed ? 'Registration Incomplete' : 'Registration Complete'}
+                                                            {response.completed ? 'Registration Completed' : 'Registration Incomplete'}
                                                         </button>
                                                     </td>
                                                 </tr>
