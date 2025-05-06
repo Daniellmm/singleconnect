@@ -257,12 +257,12 @@ const AdminDashboard = () => {
                 <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                     <div className="flex items-center">
                         <img src={LOGO} className="h-12 w-12 rounded-full mr-3" alt="Logo" />
-                        <h1 className="text-lg lg:text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+                        <h1 className="text-sm lg:text-2xl font-bold text-gray-900">Admin Dashboard</h1>
                     </div>
                     <div className="flex space-x-4">
                         <button
                             onClick={handleLogout}
-                            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                            className="px-4 py-2 bg-red-600 text-sm lg:text-lg text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                         >
                             Logout
                         </button>
@@ -320,12 +320,12 @@ const AdminDashboard = () => {
                         </div>
                         
                         {/* Action Buttons */}
-                        <div className="mt-4 justify-between flex space-x-4">
+                        <div className="mt-4 justify-between flex space-x-4 space-y-4 flex-col lg:flex-row">
                         <div className="relative">
                                 <input
                                     type="text"
                                     placeholder="Search participants..."
-                                    className="w-64 rounded-xl border-gray-300 shadow-sm p-3 focus:border-blue-500 focus:ring-blue-500"
+                                    className="lg:w-64 rounded-xl w-full border-gray-300 shadow-sm p-3 focus:border-blue-500 focus:ring-blue-500"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
