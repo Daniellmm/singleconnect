@@ -474,7 +474,7 @@ const AdminDashboard = () => {
                         </div>
 
                         {/* CSV Upload Section */}
-                        <div className='flex  w-full gap-x-10 items-center justify-center'>
+                        <div className='flex flex-col lg:flex-row  w-full gap-x-10 gap-y-5 items-center justify-center'>
                             <div className="mt-4 bg-white shadow overflow-hidden w-full sm:rounded-md p-4">
                                 <h3 className="text-lg font-medium text-gray-900 mb-4">Import Participants from CSV</h3>
                                 <div className="flex flex-col md:flex-row gap-4 items-center">
@@ -510,7 +510,7 @@ const AdminDashboard = () => {
                                 )}
                             </div>
 
-                            <div className='flex space-y-4 w-full justify-end flex-col items-end'>
+                            <div className='flex space-y-4 w-full justify-center  lg:justify-end gap-x-10 lg:flex-col items-end'>
                                 <div>
                                     <button
                                         onClick={fetchResponses}
