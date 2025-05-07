@@ -100,6 +100,7 @@ const AdminDashboard = () => {
         }
     };
 
+    
     // update registration status in Firestore
     const updateRegistrationStatus = async (responseId, completed) => {
         try {
@@ -107,19 +108,20 @@ const AdminDashboard = () => {
             await updateDoc(responseRef, { completed });
 
             // update local state
-            setResponses(prevResponses =>
-                prevResponses.map(response =>
+            setResponses(prevResponses => {
+                const updatedResponses = prevResponses.map(response =>
                     response.id === responseId ? { ...response, completed } : response
-                )
-            );
+                );
 
-            // update stats
-            setStats(prevStats => ({
-                ...prevStats,
-                completedRegistrations: completed
-                    ? prevStats.completedRegistrations + 1
-                    : prevStats.completedRegistrations - 1
-            }));
+                const completedCount = updatedResponses.filter(response => response.completed).length;
+
+                setStats(prevStats => ({
+                    ...prevStats,
+                    completedRegistrations: completedCount
+                }));
+
+                return updatedResponses;
+            });
 
         } catch (err) {
             console.error("Error updating status:", err);
