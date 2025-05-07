@@ -152,16 +152,11 @@ const NavBar = () => {
                             </li>
                         ))}
                         <li className='pt-4'>
-                            <ScrollLink
-                                to="register"
-                                smooth={true}
-                                duration={500}
-                                offset={-70}
+                            <button
                                 className='bg-transparent border-[2px] rounded-lg text-black font-bold text-sm py-3 px-2 border-black mt-3 w-full text-center cursor-pointer'
-                                onClick={() => setIsOpen(false)} 
                             >
-                                REGISTER NOW
-                            </ScrollLink>
+                                <a href="https://bit.ly/singlesconnect25">REGISTER NOW</a>
+                            </button>
                         </li>
                     </ul>
                 </div>

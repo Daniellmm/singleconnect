@@ -153,13 +153,12 @@ const HomePage = () => {
                     </div>
                     <div className='w-[100%] flex flex-col lg:items-start justify-center items-center'>
                         <h1 className='lg:text-5xl text-3xl font-bold pb-3'>Register here</h1>
-                        <p>Follow this link to register - </p>
+                        <p className='text-center lg:text-start font-bold'>Follow this link to register - <br className='lg:hidden ' /> <a className='italic font-normal text-blue-400' href="https://bit.ly/singlesconnect25">REGISTER NOW</a></p>
 
                         <div className='flex flex-col justify-center lg:items-start pt-5 items-center'>
                             <h1 className='text-2xl text-pink-600'>Important Notice:</h1>
-                            <p className='text-center lg:text-start pt-2'>Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                                Saepe earum quam sunt distinctio libero harum animi ad impedit,
-                                debitis ut quisquam aliquid pariatur adipisci repellat autem aliquam provident omnis magnam!</p>
+                            <p className='text-center lg:text-start pt-2'>Come with an open mind, You're not meant to do this alone.
+                                If you're ready to grow in your faith, form meaningful connections, and explore what God has in store for your future, Singles Connect is for you.</p>
                         </div>
                     </div>
                 </div>
