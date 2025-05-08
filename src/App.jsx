@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/mainPage'
 import AdminLogin from './admin/auth/adminLogin'
 import AdminDashboard from './admin/pages/AdminDashboard'
-import AdminRouteGuard from './admin/conponents/AdminRouteGuard'
+import AdminRouteGuard from './admin/components/AdminRouteGuard'
 
 function App() {
   return (
