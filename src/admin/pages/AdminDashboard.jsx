@@ -252,52 +252,52 @@ const AdminDashboard = () => {
 
     // Update registration status (locally only)
     // Update registration status (locally only)
-const updateRegistrationStatus = useCallback((responseId, completed) => {
-    // Update in displayed responses and cache in a single batch
-    setDashboardState(prev => {
-        // First update the displayed responses
-        const updatedResponses = prev.responses.map(response =>
-            response.id === responseId ? { ...response, completed, isDirty: true } : response
+    const updateRegistrationStatus = useCallback((responseId, completed) => {
+        // Update in displayed responses and cache in a single batch
+        setDashboardState(prev => {
+            // First update the displayed responses
+            const updatedResponses = prev.responses.map(response =>
+                response.id === responseId ? { ...response, completed, isDirty: true } : response
+            );
+
+            // Calculate new stats based on the current allResponsesCache plus this change
+            // This ensures we have accurate stats even before the cache state updates
+            const updatedAllResponsesCache = allResponsesCache.map(response =>
+                response.id === responseId ? { ...response, completed, isDirty: true } : response
+            );
+
+            const totalResponses = updatedAllResponsesCache.length;
+            const completedRegistrations = updatedAllResponsesCache.filter(r => r.completed).length;
+
+            // Return updated state with new responses and stats
+            return {
+                ...prev,
+                responses: updatedResponses,
+                stats: {
+                    totalResponses,
+                    completedRegistrations
+                }
+            };
+        });
+
+        // Update the cache separately
+        setAllResponsesCache(prev =>
+            prev.map(response =>
+                response.id === responseId ? { ...response, completed, isDirty: true } : response
+            )
         );
-        
-        // Calculate new stats based on the current allResponsesCache plus this change
-        // This ensures we have accurate stats even before the cache state updates
-        const updatedAllResponsesCache = allResponsesCache.map(response =>
-            response.id === responseId ? { ...response, completed, isDirty: true } : response
-        );
-        
-        const totalResponses = updatedAllResponsesCache.length;
-        const completedRegistrations = updatedAllResponsesCache.filter(r => r.completed).length;
-        
-        // Return updated state with new responses and stats
-        return {
+
+        // Add to pending changes
+        setPendingChanges(prev => ({
             ...prev,
-            responses: updatedResponses,
-            stats: {
-                totalResponses,
-                completedRegistrations
+            statusUpdates: {
+                ...prev.statusUpdates,
+                [responseId]: { completed }
             }
-        };
-    });
+        }));
 
-    // Update the cache separately
-    setAllResponsesCache(prev =>
-        prev.map(response =>
-            response.id === responseId ? { ...response, completed, isDirty: true } : response
-        )
-    );
-
-    // Add to pending changes
-    setPendingChanges(prev => ({
-        ...prev,
-        statusUpdates: {
-            ...prev.statusUpdates,
-            [responseId]: { completed }
-        }
-    }));
-
-    setHasUnsavedChanges(true);
-}, [allResponsesCache]);
+        setHasUnsavedChanges(true);
+    }, [allResponsesCache]);
 
     // Add participant to local cache
     const handleAddParticipant = useCallback((e) => {
@@ -892,11 +892,18 @@ const updateRegistrationStatus = useCallback((responseId, completed) => {
                                         {dashboardState.loading ? 'Syncing...' : ' Save Changes'}
                                     </button>
                                 </div>
-
+                                <div>
+                                    <button
+                                        onClick={fetchAllResponses} // Attach the fetchAllResponses function
+                                        className="px-4 py-1 text-sm bg-orange-600  lg:text-sm text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    >
+                                        Reload Page
+                                    </button>
+                                </div>
                                 <div>
                                     <button
                                         onClick={() => setShowAddForm(!showAddForm)}
-                                        className={`px-4 py-2 text-white rounded-md ${showAddForm ? 'bg-red-500 hover:bg-red-700 border-red-500 focus:ring-red-700' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500'}  focus:outline-none focus:ring-2 `}
+                                        className={`px-3 py-2 text-white rounded-md ${showAddForm ? 'bg-red-500 hover:bg-red-700 border-red-500 focus:ring-red-700' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500'}  focus:outline-none focus:ring-2 `}
                                     >
                                         {showAddForm ? 'Cancel' : 'Add Participant'}
                                     </button>
