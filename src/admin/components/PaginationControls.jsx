@@ -2,7 +2,7 @@ import React from 'react';
 
 const PaginationControls = ({ loadPrevPage, loadNextPage, isFirstPage, hasMore }) => {
   return (
-    <div className="flex justify-center items-center mt-6">
+    <div className="flex justify-center gap-5 items-center mt-6">
       <button
         onClick={loadPrevPage}
         disabled={isFirstPage}
