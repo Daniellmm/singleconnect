@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import thumbnail from "../assets/mainbg.jpg";
-import videoFile from "../assets/yoo.mp4";
+import videoFile from "../assets/vid.mp4";
 
 const VideoPlayer = () => {
   const [isOpen, setIsOpen] = useState(false);

@@ -798,6 +798,37 @@ const AdminDashboard = () => {
         navigate('/');
     }, [navigate, hasUnsavedChanges]);
 
+    // const exportToCSV = useCallback(() => {
+    //     // Prepare data for export
+    //     const exportData = allResponsesCache.map(response => ({
+    //         Name: response.data.name,
+    //         Email: response.data.email,
+    //         Gender: response.data.gender,
+    //         Organization: response.data.organization,
+    //         Phone: response.data.phone,
+    //         City: response.data.city,
+    //         State: response.data.state,
+    //         Expectation: response.data.expectation,
+    //         Referral: response.data.referral,
+    //         Registered: response.completed ? 'Yes' : 'No',
+    //         Timestamp: new Date(response.timestamp).toLocaleString()
+    //     }));
+
+    //     // Use PapaParse to create CSV
+    //     const csv = Papa.unparse(exportData);
+
+    //     // Create download link
+    //     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    //     const url = URL.createObjectURL(blob);
+    //     const link = document.createElement('a');
+    //     link.setAttribute('href', url);
+    //     link.setAttribute('download', `participants_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    //     link.style.visibility = 'hidden';
+    //     document.body.appendChild(link);
+    //     link.click();
+    //     document.body.removeChild(link);
+    // }, [allResponsesCache]);
+    
     return (
         <div className="min-h-screen bg-gray-100">
             {/* Dashboard Header */}
@@ -921,7 +952,16 @@ const AdminDashboard = () => {
                                 isSearching={dashboardState.search.isSearching}
                             />
 
-                            <div className='w-full flex justify-end'>
+                            <div className='w-full flex gap-3 justify-end'>
+                                {/* <div>
+                                    <button
+                                        onClick={exportToCSV}
+                                        className="px-4 py-2 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                    >
+                                        Download CSV
+                                    </button>
+                                </div> */}
+
                                 <select
                                     onChange={handleResponsesPerPageChange}
                                     value={dashboardState.pagination.responsesPerPage}
