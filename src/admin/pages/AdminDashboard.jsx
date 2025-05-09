@@ -123,6 +123,18 @@ const AdminDashboard = () => {
 
     // Flag to show if there are unsaved changes
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const hasFetched = useRef(false);
+
+    // Load from localStorage
+    const loadFromLocalStorage = () => {
+        const cached = localStorage.getItem('formResponsesCache');
+        return cached ? JSON.parse(cached) : [];
+    };
+
+    // Save to localStorage
+    const saveToLocalStorage = (data) => {
+        localStorage.setItem('formResponsesCache', JSON.stringify(data));
+    };
 
     const [showAddForm, setShowAddForm] = useState(false);
     const [newParticipant, setNewParticipant] = useState({
@@ -146,7 +158,7 @@ const AdminDashboard = () => {
     // Ref to track if we've already loaded data
     const initialDataLoaded = useRef(false);
 
-    // Calculate stats from local cache
+    // Define calculateStats first (since it's a dependency of fetchAllResponses)
     const calculateStats = useCallback(() => {
         const totalResponses = allResponsesCache.length;
         const completedRegistrations = allResponsesCache.filter(r => r.completed).length;
@@ -160,27 +172,50 @@ const AdminDashboard = () => {
         }));
     }, [allResponsesCache]);
 
-    // Fetch all responses once and cache them
+    // Define updateDisplayedResponses (dependency of fetchAllResponses)
+    const updateDisplayedResponses = useCallback((allResponses = allResponsesCache) => {
+        const startIdx = (dashboardState.pagination.currentPage - 1) * dashboardState.pagination.responsesPerPage;
+        const endIdx = startIdx + dashboardState.pagination.responsesPerPage;
+
+        const currentPageResponses = allResponses.slice(startIdx, endIdx);
+
+        setDashboardState(prev => ({
+            ...prev,
+            responses: currentPageResponses,
+            loading: false
+        }));
+    }, [
+        dashboardState.pagination.currentPage,
+        dashboardState.pagination.responsesPerPage,
+        allResponsesCache
+    ]);
+
+    // Define fetchAllResponses
     const fetchAllResponses = useCallback(async () => {
+        console.log("Fetching all responses from Firestore:", new Date().toISOString());
+        const cachedData = loadFromLocalStorage();
+        if (cachedData.length > 0) {
+            setAllResponsesCache(cachedData);
+            updateDisplayedResponses(cachedData);
+            calculateStats();
+            setDashboardState(prev => ({ ...prev, loading: false }));
+            initialDataLoaded.current = true; // Set flag
+            return;
+        }
+
         try {
             setDashboardState(prev => ({ ...prev, loading: true, error: null }));
-
             const responsesCollection = collection(db, 'formResponses');
             const responsesQuery = query(
                 responsesCollection,
                 orderBy("timestamp", "desc")
             );
-
             const responsesSnapshot = await getDocs(responsesQuery);
             const responsesList = responsesSnapshot.docs.map(formatResponse);
 
-            // Update our complete cache
             setAllResponsesCache(responsesList);
-
-            // Display responses based on current pagination
+            saveToLocalStorage(responsesList);
             updateDisplayedResponses(responsesList);
-
-            // Calculate stats
             setDashboardState(prev => ({
                 ...prev,
                 loading: false,
@@ -189,7 +224,6 @@ const AdminDashboard = () => {
                     completedRegistrations: responsesList.filter(r => r.completed).length
                 }
             }));
-
             initialDataLoaded.current = true;
         } catch (err) {
             console.error("Error fetching responses:", err);
@@ -198,25 +232,11 @@ const AdminDashboard = () => {
                 error: `Failed to load responses: ${err.message}`,
                 loading: false
             }));
+            initialDataLoaded.current = true;
         }
-    }, []);
+    }, [updateDisplayedResponses, calculateStats]);
 
-    // Update which responses are displayed based on pagination settings
-    const updateDisplayedResponses = useCallback((allResponses = allResponsesCache) => {
-        const startIdx = (dashboardState.pagination.currentPage - 1) * dashboardState.pagination.responsesPerPage;
-        const endIdx = startIdx + dashboardState.pagination.responsesPerPage;
 
-        // Get the slice of responses for current page
-        const currentPageResponses = allResponses.slice(startIdx, endIdx);
-
-        setDashboardState(prev => ({
-            ...prev,
-            responses: currentPageResponses,
-            loading: false
-        }));
-    }, [dashboardState.pagination.currentPage, dashboardState.pagination.responsesPerPage, allResponsesCache]);
-
-    // Load next page from local cache
     const loadNextPage = useCallback(() => {
         const newPage = dashboardState.pagination.currentPage + 1;
         const startIdx = (newPage - 1) * dashboardState.pagination.responsesPerPage;
@@ -234,7 +254,6 @@ const AdminDashboard = () => {
         }
     }, [dashboardState.pagination.currentPage, dashboardState.pagination.responsesPerPage, allResponsesCache.length]);
 
-    // Load previous page from local cache
     const loadPrevPage = useCallback(() => {
         if (dashboardState.pagination.currentPage > 1) {
             const newPage = dashboardState.pagination.currentPage - 1;
@@ -250,7 +269,7 @@ const AdminDashboard = () => {
         }
     }, [dashboardState.pagination.currentPage]);
 
-    // Update registration status (locally only)
+
     // Update registration status (locally only)
     const updateRegistrationStatus = useCallback((responseId, completed) => {
         // Update in displayed responses and cache in a single batch
@@ -570,33 +589,24 @@ const AdminDashboard = () => {
         }
 
         setDashboardState(prev => ({ ...prev, loading: true }));
-
         try {
-            // Create a batch to handle multiple writes
             const batch = writeBatch(db);
-
-            // Process status updates
             Object.entries(pendingChanges.statusUpdates).forEach(([id, changes]) => {
                 const docRef = doc(db, 'formResponses', id);
                 batch.update(docRef, changes);
             });
 
-            // Process new participants
             const timestampNow = Timestamp.now();
             pendingChanges.newParticipants.forEach((participant) => {
-                // Generate permanent ID for new records
                 const newId = participant.id.startsWith('local-')
                     ? `manual-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
                     : `csv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
                 const docRef = doc(db, 'formResponses', newId);
                 batch.set(docRef, {
                     ...participant.data,
                     timestamp: timestampNow,
                     completed: false
                 });
-
-                // Update ID in cache to match Firestore
                 setAllResponsesCache(prev =>
                     prev.map(response =>
                         response.id === participant.id
@@ -606,42 +616,30 @@ const AdminDashboard = () => {
                 );
             });
 
-            // Commit the batch
             await batch.commit();
-
-            // Clear pending changes
-            setPendingChanges({
-                statusUpdates: {},
-                newParticipants: []
-            });
-
-            // Mark everything as clean
-            setAllResponsesCache(prev =>
-                prev.map(response => ({ ...response, isDirty: false }))
-            );
-
+            setPendingChanges({ statusUpdates: {}, newParticipants: [] });
+            setAllResponsesCache(prev => prev.map(response => ({ ...response, isDirty: false })));
+            saveToLocalStorage(allResponsesCache); // Update localStorage
             setHasUnsavedChanges(false);
-
-            // Update UI
             updateDisplayedResponses();
 
             setDashboardState(prev => ({
                 ...prev,
                 loading: false,
-                successMessage: "All changes synced successfully to database!",
+                successMessage: "All changes synced successfully!",
                 successTimeout: setTimeout(() => {
                     setDashboardState(prev => ({ ...prev, successMessage: null }));
                 }, 3000)
             }));
         } catch (err) {
-            console.error("Error syncing changes to Firestore:", err);
+            console.error("Error syncing changes:", err);
             setDashboardState(prev => ({
                 ...prev,
                 loading: false,
                 error: `Failed to sync changes: ${err.message}`
             }));
         }
-    }, [hasUnsavedChanges, pendingChanges, updateDisplayedResponses]);
+    }, [hasUnsavedChanges, pendingChanges, updateDisplayedResponses, allResponsesCache]);
 
     // Optimized search functionality using local cache
     const handleSearch = useCallback(() => {
@@ -745,21 +743,14 @@ const AdminDashboard = () => {
     // Refresh data from Firestore
     const refreshFromFirestore = useCallback(async () => {
         if (hasUnsavedChanges) {
-            if (!window.confirm("You have unsaved changes that will be lost if you refresh. Continue?")) {
+            if (!window.confirm("You have unsaved changes that will be lost. Continue?")) {
                 return;
             }
         }
-
-        // Reset states
-        setPendingChanges({
-            statusUpdates: {},
-            newParticipants: []
-        });
+        setPendingChanges({ statusUpdates: {}, newParticipants: [] });
         setHasUnsavedChanges(false);
-
-        // Fetch fresh data
+        localStorage.removeItem('formResponsesCache');
         await fetchAllResponses();
-
         setDashboardState(prev => ({
             ...prev,
             successMessage: "Data refreshed from database.",
@@ -771,22 +762,23 @@ const AdminDashboard = () => {
 
     // Effect to update displayed responses when pagination changes
     useEffect(() => {
-        if (initialDataLoaded.current) {
-            updateDisplayedResponses();
-        }
-    }, [dashboardState.pagination.currentPage, dashboardState.pagination.responsesPerPage, updateDisplayedResponses]);
+    if (!dashboardState.loading) {
+        updateDisplayedResponses();
+    }
+}, [dashboardState.pagination.currentPage, dashboardState.pagination.responsesPerPage, updateDisplayedResponses, dashboardState.loading]);
 
     // Load responses on component mount
     useEffect(() => {
-        fetchAllResponses();
-
-        // Clean up timeout on component unmount
+        if (!hasFetched.current) {
+            fetchAllResponses();
+            hasFetched.current = true;
+        }
         return () => {
             if (dashboardState.successTimeout) {
                 clearTimeout(dashboardState.successTimeout);
             }
         };
-    }, [fetchAllResponses]);
+    }, [fetchAllResponses, dashboardState.successTimeout]);
 
     const handleLogout = useCallback(() => {
         if (hasUnsavedChanges) {
@@ -828,7 +820,7 @@ const AdminDashboard = () => {
     //     link.click();
     //     document.body.removeChild(link);
     // }, [allResponsesCache]);
-    
+
     return (
         <div className="min-h-screen bg-gray-100">
             {/* Dashboard Header */}
@@ -925,10 +917,14 @@ const AdminDashboard = () => {
                                 </div>
                                 <div>
                                     <button
-                                        onClick={fetchAllResponses} // Attach the fetchAllResponses function
-                                        className="px-4 py-1 text-sm bg-orange-600  lg:text-sm text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        onClick={() => {
+                                            if (window.confirm("Reload will fetch all data from Firestore. Continue?")) {
+                                                refreshFromFirestore();
+                                            }
+                                        }}
+                                        className="px-4 py-1 text-sm bg-orange-600 lg:text-sm text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
                                     >
-                                        Reload Page
+                                        Refresh Data
                                     </button>
                                 </div>
                                 <div>
@@ -1001,7 +997,9 @@ const AdminDashboard = () => {
                                 loadPrevPage={loadPrevPage}
                                 loadNextPage={loadNextPage}
                                 isFirstPage={dashboardState.pagination.isFirstPage}
-                                hasMore={dashboardState.responses.length >= dashboardState.pagination.responsesPerPage}
+                                hasMore={
+                                    (dashboardState.pagination.currentPage * dashboardState.pagination.responsesPerPage) < allResponsesCache.length
+                                }
                             />
                         )}
                     </div>
