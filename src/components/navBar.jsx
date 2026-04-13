@@ -1,168 +1,167 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react';
 import { HiMenu, HiX } from 'react-icons/hi';
 import { Link as RouterLink } from 'react-router-dom';
-import { Link as ScrollLink } from 'react-scroll';
-import LOGO from '../assets/logo.jpg'
+import LOGO from '../assets/logo.jpg';
+
+const NAV_LINKS = [
+  { name: 'Home',         id: 'home' },
+  { name: 'About',        id: 'about' },
+  { name: 'Speakers',     id: 'speakers' },
+  { name: 'Schedule',     id: 'schedule' },
+  { name: 'Testimonials', id: 'testimonials' },
+  { name: 'Gallery',      id: 'gallery' },
+  { name: 'Sponsors',     id: 'sponsors' },
+];
+
+const scrollTo = (id) => {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
 
 const NavBar = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
-    const [activeLink, setActiveLink] = useState('Home');
+  const [isOpen,     setIsOpen]     = useState(false);
+  const [scrolled,   setScrolled]   = useState(false);
+  const [activeLink, setActiveLink] = useState('home');
 
-    const toggleMenu = () => setIsOpen(!isOpen);
+  /* Scroll-based background */
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-    const navLinks = [
-        { name: 'Home', id: 'home', type: 'scroll' },
-        { name: 'About S.C.', id: 'about', type: 'scroll' },
-        { name: 'Ministers', id: 'ministers', type: 'scroll' },
-        { name: 'Gallery', id: 'gallery', type: 'scroll' },
-        { name: 'Dashboard', path: '/admin-login', type: 'route' }
-    ];
+  /* Active section via IntersectionObserver */
+  useEffect(() => {
+    const ids = [...NAV_LINKS.map(l => l.id), 'register'];
+    const elements = ids.map(id => document.getElementById(id)).filter(Boolean);
 
-    // Handle scroll effect for navbar background
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-    
-    
-    useEffect(() => {
-        const sectionIds = navLinks.filter(link => link.type === 'scroll').map(link => link.id);
-        const sectionElements = sectionIds.map(id => document.getElementById(id));
-        
-        // Configuration for the observer
-        const observerOptions = {
-            root: null, 
-            rootMargin: '1% 0px', 
-            threshold: 0.6 
-        };
-        
-        const observerCallback = (entries) => {
-            // Filter for only the entries that are currently intersecting
-            const visibleEntries = entries.filter(entry => entry.isIntersecting);
-            
-            if (visibleEntries.length > 0) {
-                // If multiple sections are visible, take the first one (highest in the DOM)
-                const sectionId = visibleEntries[0].target.id;
-                const navItem = navLinks.find(link => link.id === sectionId);
-                if (navItem) {
-                    setActiveLink(navItem.name);
-                }
-            }
-        };
-        
-        const observer = new IntersectionObserver(observerCallback, observerOptions);
-        
-        
-        sectionElements.forEach(element => {
-            if (element) {
-                observer.observe(element);
-            }
-        });
-        
-        return () => {
-            sectionElements.forEach(element => {
-                if (element) {
-                    observer.unobserve(element);
-                }
-            });
-        };
-    }, [navLinks]); 
-
-    // Function to handle scrolling to sections
-    const scrollToSection = (id, linkName) => {
-        const target = document.getElementById(id);
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
-            setActiveLink(linkName);
-            setIsOpen(false); // Close mobile menu after clicking
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter(e => e.isIntersecting);
+        if (visible.length > 0) {
+          setActiveLink(visible[0].target.id);
         }
-    };
+      },
+      { rootMargin: '0px 0px -55% 0px', threshold: 0 }
+    );
 
-    return (
-        <div className={`w-full fixed top-0 left-0 z-50 transition-all duration-300 lg:pt-4
-            ${scrolled ? 'bg-white shadow-md' : 'lg:bg-transparent lg:text-white bg-white text-black'} 
-            py-1 px-8 lg:px-20`}>
+    elements.forEach(el => observer.observe(el));
+    return () => elements.forEach(el => observer.unobserve(el));
+  }, []);
 
-            <div className='flex justify-between items-center'>
-                <div className='flex justify-center font-bold'>
-                    <img src={LOGO} className='h-12 rounded-full' alt="Logo" />
-                </div>
-                <div className='lg:hidden'>
-                    <button onClick={toggleMenu} aria-label="Toggle menu">
-                        {isOpen ? <HiX className='text-3xl' /> : <HiMenu className='text-3xl' />}
-                    </button>
-                </div>
-                <div className='hidden lg:flex'>
-                    <ul className='flex space-x-5 lg:space-x-14'>
-                        {navLinks.map(link => (
-                            <li
-                                key={link.name}
-                                onClick={() => link.type === 'scroll' && scrollToSection(link.id, link.name)}
-                                className={`font-semibold text-md cursor-pointer relative after:content-[''] after:absolute after:h-[2px] after:bg-pink-600 after:w-full after:left-0 after:-bottom-1 transition-all duration-300 ${activeLink === link.name ? 'after:visible' : 'after:invisible'
-                                    }`}
-                            >
-                                {link.type === 'route' ? (
-                                    <RouterLink to={link.path} className="block">
-                                        {link.name}
-                                    </RouterLink>
-                                ) : (
-                                    <span className="block">{link.name}</span>
-                                )}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                <div className='hidden lg:block'>
-                    <ScrollLink
-                        to="register"
-                        smooth={true}
-                        duration={500}
-                        offset={-70}
-                        className={`bg-transparent border-[2px] rounded-lg font-bold text-lg md:text-[12px] py-2 px-4 border-black ${scrolled ? 'border-black' : 'border-white hover:text-black'
-                            } hover:bg-pink-600 hover:border-pink-600 hover:text-white transition duration-500 cursor-pointer`}
-                    >
-                        REGISTER NOW
-                    </ScrollLink>
-                </div>
-            </div>
+  const handleNavClick = useCallback((id) => {
+    scrollTo(id);
+    setActiveLink(id);
+    setIsOpen(false);
+  }, []);
 
-            {/* Mobile Menu Dropdown */}
-            {isOpen && (
-                <div className='lg:hidden mt-4 text-black p-4 rounded'>
-                    <ul className='flex flex-col space-y-4'>
-                        {navLinks.map(link => (
-                            <li 
-                                key={link.name}
-                                onClick={() => link.type === 'scroll' 
-                                    ? scrollToSection(link.id, link.name) 
-                                    : setIsOpen(false)}
-                                className={`font-semibold text-xl cursor-pointer relative after:content-[''] after:absolute after:h-[2px] after:bg-pink-600 after:w-full after:left-0 after:-bottom-1 ${activeLink === link.name ? 'after:visible' : 'after:invisible'}`}
-                            >
-                                {link.type === 'route' ? (
-                                    <RouterLink to={link.path} className="block">
-                                        {link.name}
-                                    </RouterLink>
-                                ) : (
-                                    <span className="block">{link.name}</span>
-                                )}
-                            </li>
-                        ))}
-                        <li className='pt-4'>
-                            <button
-                                className='bg-transparent border-[2px] rounded-lg text-black font-bold text-sm py-3 px-2 border-black mt-3 w-full text-center cursor-pointer'
-                            >
-                                <a href="https://bit.ly/singlesconnect25">REGISTER NOW</a>
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            )}
+  return (
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500
+        ${scrolled
+          ? 'bg-brand-dark/95 backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.5)] py-3'
+          : 'bg-transparent py-5'
+        }`}
+    >
+      <div className="max-w-7xl mx-auto px-5 lg:px-10 flex items-center justify-between">
+
+        {/* Logo */}
+        <button
+          onClick={() => handleNavClick('home')}
+          className="flex items-center gap-3 group"
+        >
+          <img
+            src={LOGO}
+            alt="Singles Connect"
+            className="h-10 w-10 rounded-full object-cover ring-2 ring-brand-gold/40 group-hover:ring-brand-gold transition-all duration-300"
+          />
+          {/* <span className="hidden sm:block text-white font-bold text-sm tracking-wider">
+            <span className="text-brand-rose">SINGLES</span>{' '}
+            <span className="text-brand-gold">CONNECT</span>
+          </span> */}
+        </button>
+
+        {/* Desktop nav links */}
+        <nav className="hidden lg:flex items-center gap-8">
+          {NAV_LINKS.map(link => (
+            <button
+              key={link.id}
+              onClick={() => handleNavClick(link.id)}
+              className={`text-sm font-medium tracking-wide transition-colors duration-200 relative
+                after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-brand-gold after:transition-all after:duration-300
+                ${activeLink === link.id
+                  ? 'text-brand-gold after:w-full'
+                  : 'text-white/80 hover:text-white after:w-0 hover:after:w-full'
+                }`}
+            >
+              {link.name}
+            </button>
+          ))}
+        </nav>
+
+        {/* Desktop CTA */}
+        <div className="hidden lg:block">
+          <button
+            onClick={() => handleNavClick('register')}
+            className="btn-rose text-sm"
+          >
+            Register Now
+          </button>
         </div>
-    )
-}
 
-export default NavBar
+        {/* Mobile hamburger */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="lg:hidden text-white p-2"
+          aria-label="Toggle menu"
+        >
+          {isOpen ? <HiX className="text-3xl" /> : <HiMenu className="text-3xl" />}
+        </button>
+      </div>
+
+      {/* Mobile menu */}
+      <div
+        className={`lg:hidden overflow-hidden transition-all duration-400 ease-in-out
+          ${isOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`}
+      >
+        <div className="bg-brand-dark/98 backdrop-blur-md px-6 pb-6 pt-2 border-t border-white/5">
+          <ul className="flex flex-col gap-1 mt-2">
+            {NAV_LINKS.map(link => (
+              <li key={link.id}>
+                <button
+                  onClick={() => handleNavClick(link.id)}
+                  className={`w-full text-left py-3 px-3 rounded-lg text-base font-medium transition-colors duration-200
+                    ${activeLink === link.id
+                      ? 'text-brand-gold bg-brand-gold/10'
+                      : 'text-white/80 hover:text-white hover:bg-white/5'
+                    }`}
+                >
+                  {link.name}
+                </button>
+              </li>
+            ))}
+            <li className="pt-3">
+              <button
+                onClick={() => handleNavClick('register')}
+                className="btn-rose w-full text-sm"
+              >
+                Register Now
+              </button>
+            </li>
+            {/* <li className="pt-1">
+              <RouterLink
+                to="/admin-login"
+                onClick={() => setIsOpen(false)}
+                className="block text-center py-2 text-xs text-white/30 hover:text-white/50 transition-colors"
+              >
+                Admin
+              </RouterLink>
+            </li> */}
+          </ul>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default NavBar;

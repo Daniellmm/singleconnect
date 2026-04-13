@@ -1,1012 +1,491 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LOGO from '../assets/logo.jpg';
-import {
-    collection,
-    getDocs,
-    doc,
-    updateDoc,
-    query,
-    where,
-    setDoc,
-    limit,
-    startAfter,
-    orderBy,
-    getCountFromServer,
-    Timestamp,
-    writeBatch
-} from 'firebase/firestore';
-import { db } from '../../firebase';
 import Papa from 'papaparse';
+import { supabase } from '../../supabase';
+import LOGO from '../assets/logo.jpg';
 
-// Component imports
-import StatsCard from '../components/StatsCard';
-import CsvUploadForm from '../components/CsvUploadForm';
-import SearchBar from '../components/SearchBar';
+import StatsCard        from '../components/StatsCard';
+import CsvUploadForm    from '../components/CsvUploadForm';
+import SearchBar        from '../components/SearchBar';
 import ParticipantTable from '../components/ParticipantTable';
-import AddParticipantForm from '../components/AddParticipantForm';
-import PaginationControls from '../components/PaginationControls';
+import AddParticipantForm  from '../components/AddParticipantForm';
+import PaginationControls  from '../components/PaginationControls';
 
-// Utility functions
-const normalizeTimestamp = (timestamp) => {
-    if (!timestamp) return new Date().toISOString();
+/* ─── helpers ─────────────────────────────────────────────────── */
 
-    // Handle Firestore Timestamp objects
-    if (timestamp.toDate && typeof timestamp.toDate === 'function') {
-        return timestamp.toDate().toISOString();
-    }
+/** Map a Supabase row to the shape the existing UI components expect */
+const rowToResponse = (row) => ({
+  id:        row.id,
+  data: {
+    name:         row.full_name  ?? 'N/A',
+    email:        row.email      ?? 'N/A',
+    gender:       row.gender     ?? 'N/A',
+    organization: row.church     ?? 'N/A',
+    phone:        row.phone      ?? 'N/A',
+    ageGroup:     row.age_group  ?? 'N/A',
+    hearAbout:    row.hear_about ?? 'N/A',
+  },
+  timestamp:  row.created_at,
+  completed:  row.checked_in    ?? false,
+  checkedInAt: row.checked_in_at ?? null,
+  isDirty:    false,
+});
 
-    // Handle Firestore timestampValue format
-    if (typeof timestamp === 'object' && timestamp.timestampValue) {
-        return new Date(timestamp.timestampValue).toISOString();
-    }
+/** Map a local newParticipant form object to a Supabase insert payload */
+const participantToRow = (p) => ({
+  full_name:  p.name,
+  email:      p.email,
+  phone:      p.phone      || '',
+  gender:     p.gender     || '',
+  age_group:  p.ageGroup   || '',
+  hear_about: p.referral   || '',
+  church:     p.organization || '',
+  checked_in: false,
+});
 
-    // Handle Date objects
-    if (timestamp instanceof Date) {
-        return timestamp.toISOString();
-    }
-
-    // Handle ISO string format
-    if (typeof timestamp === 'string') {
-        const date = new Date(timestamp);
-        if (!isNaN(date.getTime())) {
-            return date.toISOString();
-        }
-    }
-
-    // Handle seconds and nanoseconds format (Firestore representation)
-    if (typeof timestamp === 'object' && timestamp.seconds) {
-        return new Date(timestamp.seconds * 1000).toISOString();
-    }
-
-    return new Date().toISOString();
-};
-
-const formatResponse = (docSnapshot) => {
-    const data = docSnapshot.data();
-    const id = docSnapshot.id;
-
-    // Handle timestamp consistently
-    const timestamp = normalizeTimestamp(data.timestamp);
-
-    return {
-        id: id,
-        data: {
-            name: data.name || 'N/A',
-            email: data.email || 'N/A',
-            gender: data.gender || 'N/A',
-            organization: data.organization || 'N/A',
-            phone: data.phone || 'N/A',
-            city: data.city || 'N/A',
-            state: data.state || 'N/A',
-            expectation: data.expectation || 'N/A',
-            referral: data.referral || 'N/A'
-        },
-        timestamp: timestamp,
-        completed: data.completed || false,
-        // Add a dirty flag to track local changes
-        isDirty: false
-    };
-};
+/* ─── component ───────────────────────────────────────────────── */
 
 const AdminDashboard = () => {
-    const navigate = useNavigate();
-    const [dashboardState, setDashboardState] = useState({
-        responses: [],
-        loading: true,
-        error: null,
-        stats: {
-            totalResponses: 0,
-            completedRegistrations: 0
-        },
-        pagination: {
-            currentPage: 1,
-            responsesPerPage: 10,
-            lastVisible: null,
-            isFirstPage: true,
-            pageCursors: { 1: null }
-        },
-        search: {
-            searchTerm: '',
-            isSearching: false,
-            searchResults: []
-        }
+  const navigate = useNavigate();
+
+  /* ── data state ── */
+  const [allRows,       setAllRows]       = useState([]);   // full dataset
+  const [displayed,     setDisplayed]     = useState([]);   // current page rows
+  const [loading,       setLoading]       = useState(true);
+  const [error,         setError]         = useState(null);
+  const [successMsg,    setSuccessMsg]    = useState('');
+
+  /* ── stats ── */
+  const [stats, setStats] = useState({ total: 0, checkedIn: 0 });
+
+  /* ── pagination ── */
+  const [page,    setPage]    = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
+  /* ── search ── */
+  const [searchTerm,    setSearchTerm]    = useState('');
+  const [isSearching,   setIsSearching]   = useState(false);
+
+  /* ── add form ── */
+  const EMPTY_PARTICIPANT = {
+    name: '', email: '', phone: '', gender: '', ageGroup: '', organization: '', referral: '',
+  };
+  const [showAddForm,    setShowAddForm]    = useState(false);
+  const [newParticipant, setNewParticipant] = useState(EMPTY_PARTICIPANT);
+  const [addLoading, setAddLoading] = useState(false);
+
+  /* ── csv ── */
+  const [csvFile,      setCsvFile]      = useState(null);
+  const [csvStatus,    setCsvStatus]    = useState('');
+  const [csvUploading, setCsvUploading] = useState(false);
+
+  const hasFetched = useRef(false);
+
+  /* ── flash helper ── */
+  const flash = useCallback((msg) => {
+    setSuccessMsg(msg);
+    setTimeout(() => setSuccessMsg(''), 3500);
+  }, []);
+
+  /* ── recalc stats whenever allRows changes ── */
+  useEffect(() => {
+    setStats({
+      total:     allRows.length,
+      checkedIn: allRows.filter(r => r.completed).length,
     });
-
-    // Local cache of all responses
-    const [allResponsesCache, setAllResponsesCache] = useState([]);
-    // Track changes pending to be synced with Firestore
-    const [pendingChanges, setPendingChanges] = useState({
-        statusUpdates: {}, // Format: { responseId: { completed: boolean } }
-        newParticipants: [] // Array of new participant objects to be added
-    });
-
-    // Flag to show if there are unsaved changes
-    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-    const hasFetched = useRef(false);
-
-    // Load from localStorage
-    const loadFromLocalStorage = () => {
-        const cached = localStorage.getItem('formResponsesCache');
-        return cached ? JSON.parse(cached) : [];
-    };
-
-    // Save to localStorage
-    const saveToLocalStorage = (data) => {
-        localStorage.setItem('formResponsesCache', JSON.stringify(data));
-    };
-
-    const [showAddForm, setShowAddForm] = useState(false);
-    const [newParticipant, setNewParticipant] = useState({
-        name: '',
-        email: '',
-        gender: '',
-        organization: '',
-        phone: '',
-        city: '',
-        state: '',
-        expectation: '',
-        referral: ''
-    });
-
-    const [csvState, setCsvState] = useState({
-        file: null,
-        uploadStatus: '',
-        isUploading: false
-    });
-
-    // Ref to track if we've already loaded data
-    const initialDataLoaded = useRef(false);
-
-    // Define calculateStats first (since it's a dependency of fetchAllResponses)
-    const calculateStats = useCallback(() => {
-        const totalResponses = allResponsesCache.length;
-        const completedRegistrations = allResponsesCache.filter(r => r.completed).length;
-
-        setDashboardState(prev => ({
-            ...prev,
-            stats: {
-                totalResponses,
-                completedRegistrations
-            }
-        }));
-    }, [allResponsesCache]);
-
-    // Define updateDisplayedResponses (dependency of fetchAllResponses)
-    const updateDisplayedResponses = useCallback((allResponses = allResponsesCache) => {
-        const startIdx = (dashboardState.pagination.currentPage - 1) * dashboardState.pagination.responsesPerPage;
-        const endIdx = startIdx + dashboardState.pagination.responsesPerPage;
-
-        const currentPageResponses = allResponses.slice(startIdx, endIdx);
-
-        setDashboardState(prev => ({
-            ...prev,
-            responses: currentPageResponses,
-            loading: false
-        }));
-    }, [
-        dashboardState.pagination.currentPage,
-        dashboardState.pagination.responsesPerPage,
-        allResponsesCache
-    ]);
-
-    // Define fetchAllResponses
-    const fetchAllResponses = useCallback(async () => {
-        console.log("Fetching all responses from Firestore:", new Date().toISOString());
-        const cachedData = loadFromLocalStorage();
-        if (cachedData.length > 0) {
-            setAllResponsesCache(cachedData);
-            updateDisplayedResponses(cachedData);
-            calculateStats();
-            setDashboardState(prev => ({ ...prev, loading: false }));
-            initialDataLoaded.current = true; // Set flag
-            return;
-        }
-
-        try {
-            setDashboardState(prev => ({ ...prev, loading: true, error: null }));
-            const responsesCollection = collection(db, 'formResponses');
-            const responsesQuery = query(
-                responsesCollection,
-                orderBy("timestamp", "desc")
-            );
-            const responsesSnapshot = await getDocs(responsesQuery);
-            const responsesList = responsesSnapshot.docs.map(formatResponse);
-
-            setAllResponsesCache(responsesList);
-            saveToLocalStorage(responsesList);
-            updateDisplayedResponses(responsesList);
-            setDashboardState(prev => ({
-                ...prev,
-                loading: false,
-                stats: {
-                    totalResponses: responsesList.length,
-                    completedRegistrations: responsesList.filter(r => r.completed).length
-                }
-            }));
-            initialDataLoaded.current = true;
-        } catch (err) {
-            console.error("Error fetching responses:", err);
-            setDashboardState(prev => ({
-                ...prev,
-                error: `Failed to load responses: ${err.message}`,
-                loading: false
-            }));
-            initialDataLoaded.current = true;
-        }
-    }, [updateDisplayedResponses, calculateStats]);
-
-
-    const loadNextPage = useCallback(() => {
-        const newPage = dashboardState.pagination.currentPage + 1;
-        const startIdx = (newPage - 1) * dashboardState.pagination.responsesPerPage;
-
-        // Check if we have more data
-        if (startIdx < allResponsesCache.length) {
-            setDashboardState(prev => ({
-                ...prev,
-                pagination: {
-                    ...prev.pagination,
-                    currentPage: newPage,
-                    isFirstPage: false
-                }
-            }));
-        }
-    }, [dashboardState.pagination.currentPage, dashboardState.pagination.responsesPerPage, allResponsesCache.length]);
-
-    const loadPrevPage = useCallback(() => {
-        if (dashboardState.pagination.currentPage > 1) {
-            const newPage = dashboardState.pagination.currentPage - 1;
-
-            setDashboardState(prev => ({
-                ...prev,
-                pagination: {
-                    ...prev.pagination,
-                    currentPage: newPage,
-                    isFirstPage: newPage === 1
-                }
-            }));
-        }
-    }, [dashboardState.pagination.currentPage]);
-
-
-    // Update registration status (locally only)
-    const updateRegistrationStatus = useCallback((responseId, completed) => {
-        // Update in displayed responses and cache in a single batch
-        setDashboardState(prev => {
-            // First update the displayed responses
-            const updatedResponses = prev.responses.map(response =>
-                response.id === responseId ? { ...response, completed, isDirty: true } : response
-            );
-
-            // Calculate new stats based on the current allResponsesCache plus this change
-            // This ensures we have accurate stats even before the cache state updates
-            const updatedAllResponsesCache = allResponsesCache.map(response =>
-                response.id === responseId ? { ...response, completed, isDirty: true } : response
-            );
-
-            const totalResponses = updatedAllResponsesCache.length;
-            const completedRegistrations = updatedAllResponsesCache.filter(r => r.completed).length;
-
-            // Return updated state with new responses and stats
-            return {
-                ...prev,
-                responses: updatedResponses,
-                stats: {
-                    totalResponses,
-                    completedRegistrations
-                }
-            };
-        });
-
-        // Update the cache separately
-        setAllResponsesCache(prev =>
-            prev.map(response =>
-                response.id === responseId ? { ...response, completed, isDirty: true } : response
-            )
-        );
-
-        // Add to pending changes
-        setPendingChanges(prev => ({
-            ...prev,
-            statusUpdates: {
-                ...prev.statusUpdates,
-                [responseId]: { completed }
-            }
-        }));
-
-        setHasUnsavedChanges(true);
-    }, [allResponsesCache]);
-
-    // Add participant to local cache
-    const handleAddParticipant = useCallback((e) => {
-        e.preventDefault();
-
-        // Generate temporary ID for this record
-        const tempId = `local-${Date.now()}`;
-
-        // Create a consistent document structure
-        const newResponse = {
-            id: tempId,
-            data: {
-                name: newParticipant.name,
-                email: newParticipant.email,
-                gender: newParticipant.gender || "",
-                organization: newParticipant.organization || "",
-                phone: newParticipant.phone || "",
-                city: newParticipant.city || "",
-                state: newParticipant.state || "",
-                expectation: newParticipant.expectation || "",
-                referral: newParticipant.referral || ""
-            },
-            timestamp: new Date().toISOString(),
-            completed: false,
-            isDirty: true
-        };
-
-        // Add to cache
-        setAllResponsesCache(prev => [newResponse, ...prev]);
-
-        // Add to pending changes
-        setPendingChanges(prev => ({
-            ...prev,
-            newParticipants: [...prev.newParticipants, {
-                id: tempId,
-                data: {
-                    name: newParticipant.name,
-                    email: newParticipant.email,
-                    gender: newParticipant.gender || "",
-                    organization: newParticipant.organization || "",
-                    phone: newParticipant.phone || "",
-                    city: newParticipant.city || "",
-                    state: newParticipant.state || "",
-                    expectation: newParticipant.expectation || "",
-                    referral: newParticipant.referral || ""
-                }
-            }]
-        }));
-
-        setHasUnsavedChanges(true);
-
-        // Reset form
-        setNewParticipant({
-            name: '',
-            email: '',
-            gender: '',
-            organization: '',
-            phone: '',
-            city: '',
-            state: '',
-            expectation: '',
-            referral: ''
-        });
-
-        setShowAddForm(false);
-
-        // Update stats and displayed responses
-        calculateStats();
-        updateDisplayedResponses([newResponse, ...allResponsesCache]);
-
-        // Show success message
-        setDashboardState(prev => ({
-            ...prev,
-            successMessage: "Participant added locally. Click 'Sync Changes' to save to database.",
-            // Auto-clear after 3 seconds
-            successTimeout: setTimeout(() => {
-                setDashboardState(prev => ({ ...prev, successMessage: null }));
-            }, 3000)
-        }));
-    }, [newParticipant, calculateStats, updateDisplayedResponses, allResponsesCache]);
-
-    // Handle CSV file upload (directly to Firestore for now)
-    const handleFileChange = (e) => {
-        setCsvState({
-            ...csvState,
-            file: e.target.files[0],
-            uploadStatus: ''
-        });
-    };
-
-    // Validate CSV row
-    const validateCsvRow = (row) => {
-        const errors = [];
-
-        if (!row['Email Address']) {
-            errors.push('Missing email address');
-        } else if (!row['Email Address'].includes('@')) {
-            errors.push('Invalid email format');
-        }
-
-        if (!row['Name'] || row['Name'].trim() === '') {
-            errors.push('Name is required');
-        }
-
-        return errors;
-    };
-
-    // Process CSV and add to local cache
-    const handleCsvUpload = useCallback(async () => {
-        if (!csvState.file) {
-            setCsvState(prev => ({
-                ...prev,
-                uploadStatus: 'Please select a CSV file first.'
-            }));
-            return;
-        }
-
-        setCsvState(prev => ({
-            ...prev,
-            uploadStatus: 'Processing CSV file...',
-            isUploading: true
-        }));
-
-        // Parse CSV file
-        Papa.parse(csvState.file, {
-            header: true,
-            skipEmptyLines: true,
-            complete: async (results) => {
-                try {
-                    if (results.errors.length > 0) {
-                        console.error("CSV parsing errors:", results.errors);
-                        setCsvState(prev => ({
-                            ...prev,
-                            uploadStatus: `Error parsing CSV: ${results.errors[0].message}`,
-                            isUploading: false
-                        }));
-                        return;
-                    }
-
-                    const { data } = results;
-
-                    if (data.length === 0) {
-                        setCsvState(prev => ({
-                            ...prev,
-                            uploadStatus: 'No data found in CSV file.',
-                            isUploading: false
-                        }));
-                        return;
-                    }
-
-                    let successCount = 0;
-                    let errorCount = 0;
-                    const errorDetails = [];
-                    const newParticipantsFromCsv = [];
-                    const newCachedResponses = [];
-
-                    for (let i = 0; i < data.length; i++) {
-                        const row = data[i];
-                        const rowIndex = i + 1; // 1-based row index for user-friendly messages
-
-                        // Validate row
-                        const validationErrors = validateCsvRow(row);
-                        if (validationErrors.length > 0) {
-                            errorCount++;
-                            errorDetails.push(`Row ${rowIndex}: ${validationErrors.join(', ')}`);
-                            continue;
-                        }
-
-                        try {
-                            // Generate ID for this record
-                            const tempId = `csv-local-${Date.now()}-${successCount}`;
-
-                            const participant = {
-                                name: row['Name'] || '',
-                                email: row['Email Address'] || '',
-                                gender: row['Gender'] || '',
-                                organization: row['Church/Organization'] || '',
-                                phone: row['Phone No.'] || '',
-                                city: row['City'] || '',
-                                state: row['State'] || '',
-                                expectation: row['What do you anticipate from the Hangout?'] || '',
-                                referral: row['How did you hear about this program'] || '',
-                            };
-
-                            // Add to pending changes
-                            newParticipantsFromCsv.push({
-                                id: tempId,
-                                data: participant
-                            });
-
-                            // Add to cache in format
-                            const newResponse = {
-                                id: tempId,
-                                data: participant,
-                                timestamp: new Date().toISOString(),
-                                completed: false,
-                                isDirty: true
-                            };
-
-                            newCachedResponses.push(newResponse);
-                            successCount++;
-                        } catch (err) {
-                            console.error(`Error processing CSV row ${rowIndex}:`, err);
-                            errorCount++;
-                            errorDetails.push(`Row ${rowIndex}: ${err.message}`);
-                        }
-                    }
-
-                    // Update cache with all new participants
-                    setAllResponsesCache(prev => [...newCachedResponses, ...prev]);
-
-                    // Add to pending changes
-                    setPendingChanges(prev => ({
-                        ...prev,
-                        newParticipants: [...prev.newParticipants, ...newParticipantsFromCsv]
-                    }));
-
-                    setHasUnsavedChanges(true);
-
-                    // Update displayed responses
-                    updateDisplayedResponses([...newCachedResponses, ...allResponsesCache]);
-
-                    // Update stats
-                    calculateStats();
-
-                    // Reset file input
-                    setCsvState(prev => ({
-                        ...prev,
-                        file: null,
-                        uploadStatus: `CSV processed: ${successCount} added locally, ${errorCount} failed. Click 'Sync Changes' to save to database.${errorDetails.length > 0
-                            ? ` First ${Math.min(3, errorDetails.length)} errors: ${errorDetails.slice(0, 3).join('; ')}${errorDetails.length > 3 ? ' (and more)' : ''
-                            }`
-                            : ''
-                            }`,
-                        isUploading: false
-                    }));
-
-                    document.getElementById('csv-file').value = '';
-                } catch (err) {
-                    console.error("Error processing CSV:", err);
-                    setCsvState(prev => ({
-                        ...prev,
-                        uploadStatus: `Error: ${err.message}`,
-                        isUploading: false
-                    }));
-                }
-            },
-            error: (error) => {
-                console.error("CSV parsing error:", error);
-                setCsvState(prev => ({
-                    ...prev,
-                    uploadStatus: `Error parsing CSV: ${error}`,
-                    isUploading: false
-                }));
-            }
-        });
-    }, [csvState.file, updateDisplayedResponses, allResponsesCache, calculateStats]);
-
-    // Sync all pending changes to Firestore
-    const syncChangesToFirestore = useCallback(async () => {
-        if (!hasUnsavedChanges) {
-            setDashboardState(prev => ({
-                ...prev,
-                successMessage: "No changes to sync.",
-                successTimeout: setTimeout(() => {
-                    setDashboardState(prev => ({ ...prev, successMessage: null }));
-                }, 3000)
-            }));
-            return;
-        }
-
-        setDashboardState(prev => ({ ...prev, loading: true }));
-        try {
-            const batch = writeBatch(db);
-            Object.entries(pendingChanges.statusUpdates).forEach(([id, changes]) => {
-                const docRef = doc(db, 'formResponses', id);
-                batch.update(docRef, changes);
-            });
-
-            const timestampNow = Timestamp.now();
-            pendingChanges.newParticipants.forEach((participant) => {
-                const newId = participant.id.startsWith('local-')
-                    ? `manual-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-                    : `csv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-                const docRef = doc(db, 'formResponses', newId);
-                batch.set(docRef, {
-                    ...participant.data,
-                    timestamp: timestampNow,
-                    completed: false
-                });
-                setAllResponsesCache(prev =>
-                    prev.map(response =>
-                        response.id === participant.id
-                            ? { ...response, id: newId, isDirty: false }
-                            : response
-                    )
-                );
-            });
-
-            await batch.commit();
-            setPendingChanges({ statusUpdates: {}, newParticipants: [] });
-            setAllResponsesCache(prev => prev.map(response => ({ ...response, isDirty: false })));
-            saveToLocalStorage(allResponsesCache); // Update localStorage
-            setHasUnsavedChanges(false);
-            updateDisplayedResponses();
-
-            setDashboardState(prev => ({
-                ...prev,
-                loading: false,
-                successMessage: "All changes synced successfully!",
-                successTimeout: setTimeout(() => {
-                    setDashboardState(prev => ({ ...prev, successMessage: null }));
-                }, 3000)
-            }));
-        } catch (err) {
-            console.error("Error syncing changes:", err);
-            setDashboardState(prev => ({
-                ...prev,
-                loading: false,
-                error: `Failed to sync changes: ${err.message}`
-            }));
-        }
-    }, [hasUnsavedChanges, pendingChanges, updateDisplayedResponses, allResponsesCache]);
-
-    // Optimized search functionality using local cache
-    const handleSearch = useCallback(() => {
-        const searchTerm = dashboardState.search.searchTerm.trim().toLowerCase();
-
-        if (searchTerm === '') {
-            updateDisplayedResponses();
-            setDashboardState(prev => ({
-                ...prev,
-                search: {
-                    ...prev.search,
-                    isSearching: false
-                },
-                error: null
-            }));
-            return;
-        }
-
-        setDashboardState(prev => ({
-            ...prev,
-            search: {
-                ...prev.search,
-                isSearching: true
-            },
-            loading: true,
-            error: null
-        }));
-
-        const filtered = allResponsesCache.filter(res => {
-            if (!res.data || typeof res.data !== 'object') return false;
-            return searchInObject(res.data, searchTerm);
-        });
-
-        setDashboardState(prev => ({
-            ...prev,
-            responses: filtered,
-            loading: false,
-            error: filtered.length === 0 ? `No results found for "${searchTerm}"` : null
-        }));
-    }, [dashboardState.search.searchTerm, allResponsesCache, updateDisplayedResponses]);
-
-    // Helper function to search deeply through objects
-    const searchInObject = (obj, searchTerm) => {
-        // Base case: If obj is null or undefined
-        if (obj === null || obj === undefined) {
-            return false;
-        }
-
-        // If obj is a primitive type
-        if (typeof obj !== 'object') {
-            return String(obj).toLowerCase().includes(searchTerm);
-        }
-
-        // If obj is an array
-        if (Array.isArray(obj)) {
-            return obj.some(item => searchInObject(item, searchTerm));
-        }
-
-        // If obj is an object
-        return Object.values(obj).some(value => searchInObject(value, searchTerm));
-    };
-
-    // Clear search and reset to pagination view
-    const clearSearch = useCallback(() => {
-        setDashboardState(prev => ({
-            ...prev,
-            search: {
-                searchTerm: '',
-                isSearching: false,
-                searchResults: []
-            }
-        }));
-        updateDisplayedResponses();
-    }, [updateDisplayedResponses]);
-
-    // Handle change in responses per page
-    const handleResponsesPerPageChange = useCallback((e) => {
-        const newValue = Number(e.target.value);
-        setDashboardState(prev => ({
-            ...prev,
-            pagination: {
-                ...prev.pagination,
-                responsesPerPage: newValue,
-                currentPage: 1,
-                isFirstPage: true
-            }
-        }));
-    }, []);
-
-    // Handle search term changes
-    const handleSearchTermChange = useCallback((e) => {
-        setDashboardState(prev => ({
-            ...prev,
-            search: {
-                ...prev.search,
-                searchTerm: e.target.value
-            }
-        }));
-    }, []);
-
-    // Refresh data from Firestore
-    const refreshFromFirestore = useCallback(async () => {
-        if (hasUnsavedChanges) {
-            if (!window.confirm("You have unsaved changes that will be lost. Continue?")) {
-                return;
-            }
-        }
-        setPendingChanges({ statusUpdates: {}, newParticipants: [] });
-        setHasUnsavedChanges(false);
-        localStorage.removeItem('formResponsesCache');
-        await fetchAllResponses();
-        setDashboardState(prev => ({
-            ...prev,
-            successMessage: "Data refreshed from database.",
-            successTimeout: setTimeout(() => {
-                setDashboardState(prev => ({ ...prev, successMessage: null }));
-            }, 3000)
-        }));
-    }, [hasUnsavedChanges, fetchAllResponses]);
-
-    // Effect to update displayed responses when pagination changes
-    useEffect(() => {
-    if (!dashboardState.loading) {
-        updateDisplayedResponses();
+  }, [allRows]);
+
+  /* ── update displayed slice ── */
+  useEffect(() => {
+    if (isSearching) return; // search manages its own slice
+    const start = (page - 1) * perPage;
+    setDisplayed(allRows.slice(start, start + perPage));
+  }, [allRows, page, perPage, isSearching]);
+
+  /* ══════════════════════════════════════════════════════════════
+     FETCH ALL
+  ══════════════════════════════════════════════════════════════ */
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    const { data, error: sbError } = await supabase
+      .from('registrations')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (sbError) {
+      setError(`Failed to load registrations: ${sbError.message}`);
+      setLoading(false);
+      return;
     }
-}, [dashboardState.pagination.currentPage, dashboardState.pagination.responsesPerPage, updateDisplayedResponses, dashboardState.loading]);
 
-    // Load responses on component mount
-    useEffect(() => {
-        if (!hasFetched.current) {
-            fetchAllResponses();
-            hasFetched.current = true;
+    const mapped = (data ?? []).map(rowToResponse);
+    setAllRows(mapped);
+    setLoading(false);
+  }, []);
+
+  /* ══════════════════════════════════════════════════════════════
+     REAL-TIME SUBSCRIPTION
+     Any INSERT / UPDATE in the table is applied locally without
+     a full re-fetch, so multiple devices stay in sync instantly.
+  ══════════════════════════════════════════════════════════════ */
+  useEffect(() => {
+    if (!hasFetched.current) {
+      fetchAll();
+      hasFetched.current = true;
+    }
+
+    const channel = supabase
+      .channel('registrations-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'registrations' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setAllRows(prev => [rowToResponse(payload.new), ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setAllRows(prev =>
+              prev.map(r => r.id === payload.new.id ? rowToResponse(payload.new) : r)
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setAllRows(prev => prev.filter(r => r.id !== payload.old.id));
+          }
         }
-        return () => {
-            if (dashboardState.successTimeout) {
-                clearTimeout(dashboardState.successTimeout);
-            }
-        };
-    }, [fetchAllResponses, dashboardState.successTimeout]);
+      )
+      .subscribe();
 
-    const handleLogout = useCallback(() => {
-        if (hasUnsavedChanges) {
-            if (!window.confirm("You have unsaved changes. Are you sure you want to logout?")) {
-                return;
-            }
-        }
-        localStorage.removeItem('adminAuthenticated');
-        navigate('/');
-    }, [navigate, hasUnsavedChanges]);
+    return () => supabase.removeChannel(channel);
+  }, [fetchAll]);
 
-    // const exportToCSV = useCallback(() => {
-    //     // Prepare data for export
-    //     const exportData = allResponsesCache.map(response => ({
-    //         Name: response.data.name,
-    //         Email: response.data.email,
-    //         Gender: response.data.gender,
-    //         Organization: response.data.organization,
-    //         Phone: response.data.phone,
-    //         City: response.data.city,
-    //         State: response.data.state,
-    //         Expectation: response.data.expectation,
-    //         Referral: response.data.referral,
-    //         Registered: response.completed ? 'Yes' : 'No',
-    //         Timestamp: new Date(response.timestamp).toLocaleString()
-    //     }));
-
-    //     // Use PapaParse to create CSV
-    //     const csv = Papa.unparse(exportData);
-
-    //     // Create download link
-    //     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    //     const url = URL.createObjectURL(blob);
-    //     const link = document.createElement('a');
-    //     link.setAttribute('href', url);
-    //     link.setAttribute('download', `participants_export_${new Date().toISOString().slice(0, 10)}.csv`);
-    //     link.style.visibility = 'hidden';
-    //     document.body.appendChild(link);
-    //     link.click();
-    //     document.body.removeChild(link);
-    // }, [allResponsesCache]);
-
-    return (
-        <div className="min-h-screen bg-gray-100">
-            {/* Dashboard Header */}
-            <header className="bg-white shadow">
-                <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-                    <div className="flex items-center">
-                        <img src={LOGO} className="h-12 w-12 rounded-full mr-3" alt="Logo" />
-                        <h1 className="text-sm lg:text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-                    </div>
-                    <div className="flex space-x-4">
-                        <button
-                            onClick={handleLogout}
-                            className="px-4 py-2 bg-red-600 text-sm lg:text-lg text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                        >
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            {/* Dashboard Content */}
-            <main className="py-6">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Dashboard Stats */}
-                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-2">
-                        <StatsCard
-                            title="Total Responses"
-                            value={dashboardState.stats.totalResponses}
-                            icon={
-                                <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                            }
-                            bgColor="bg-blue-500"
-                        />
-                        <StatsCard
-                            title="Completed Registration"
-                            value={dashboardState.stats.completedRegistrations}
-                            icon={
-                                <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            }
-                            bgColor="bg-green-500"
-                        />
-                    </div>
-
-                    <div className="mt-8">
-                        <div className='flex justify-between'>
-                            <h2 className="text-xl font-medium text-gray-900">Participant Management</h2>
-                            {hasUnsavedChanges && (
-                                <span className="text-orange-500 font-medium flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    Unsaved Changes
-                                </span>
-                            )}
-                        </div>
-
-                        {/* Success Message */}
-                        {dashboardState.successMessage && (
-                            <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-md">
-                                {dashboardState.successMessage}
-                            </div>
-                        )}
-
-                        {/* Error Message */}
-                        {dashboardState.error && (
-                            <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
-                                {dashboardState.error}
-                            </div>
-                        )}
-
-                        {/* CSV Upload Section */}
-                        <div className='flex flex-col lg:flex-row w-full gap-x-10 gap-y-5 items-center justify-center'>
-                            <CsvUploadForm
-                                handleFileChange={handleFileChange}
-                                handleCsvUpload={handleCsvUpload}
-                                csvFile={csvState.file}
-                                uploadStatus={csvState.uploadStatus}
-                                isUploading={csvState.isUploading}
-                            />
-
-                            <div className='flex space-y-4 w-full justify-center lg:justify-end gap-x-10 lg:flex-col items-end'>
-                                <div>
-                                    <button
-                                        onClick={syncChangesToFirestore}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        disabled={dashboardState.loading}
-                                    >
-                                        {dashboardState.loading ? 'Syncing...' : ' Save Changes'}
-                                    </button>
-                                </div>
-                                <div>
-                                    <button
-                                        onClick={() => {
-                                            if (window.confirm("Reload will fetch all data from Firestore. Continue?")) {
-                                                refreshFromFirestore();
-                                            }
-                                        }}
-                                        className="px-4 py-1 text-sm bg-orange-600 lg:text-sm text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                    >
-                                        Refresh Data
-                                    </button>
-                                </div>
-                                <div>
-                                    <button
-                                        onClick={() => setShowAddForm(!showAddForm)}
-                                        className={`px-3 py-2 text-white rounded-md ${showAddForm ? 'bg-red-500 hover:bg-red-700 border-red-500 focus:ring-red-700' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500'}  focus:outline-none focus:ring-2 `}
-                                    >
-                                        {showAddForm ? 'Cancel' : 'Add Participant'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Search and Pagination Controls */}
-                        <div className="mt-4 justify-center items-center flex space-x-4">
-                            <SearchBar
-                                searchTerm={dashboardState.search.searchTerm}
-                                handleSearchTermChange={handleSearchTermChange}
-                                handleSearch={handleSearch}
-                                clearSearch={clearSearch}
-                                isSearching={dashboardState.search.isSearching}
-                            />
-
-                            <div className='w-full flex gap-3 justify-end'>
-                                {/* <div>
-                                    <button
-                                        onClick={exportToCSV}
-                                        className="px-4 py-2 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                                    >
-                                        Download CSV
-                                    </button>
-                                </div> */}
-
-                                <select
-                                    onChange={handleResponsesPerPageChange}
-                                    value={dashboardState.pagination.responsesPerPage}
-                                    className="rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                >
-                                    <option value={5}>5 per page</option>
-                                    <option value={10}>10 per page</option>
-                                    <option value={20}>20 per page</option>
-                                    <option value={30}>30 per page</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* Add Participant Form */}
-                        {showAddForm && (
-                            <AddParticipantForm
-                                participant={newParticipant}
-                                setParticipant={setNewParticipant}
-                                handleSubmit={handleAddParticipant}
-                                isSubmitting={dashboardState.loading}
-                            />
-                        )}
-
-                        {/* Participants Table */}
-                        <ParticipantTable
-                            responses={dashboardState.responses}
-                            loading={dashboardState.loading}
-                            error={dashboardState.error}
-                            currentPage={dashboardState.pagination.currentPage}
-                            responsesPerPage={dashboardState.pagination.responsesPerPage}
-                            updateStatus={updateRegistrationStatus}
-                        />
-
-                        {/* Pagination controls */}
-                        {!dashboardState.loading && !dashboardState.error && dashboardState.responses.length > 0 && (
-                            <PaginationControls
-                                loadPrevPage={loadPrevPage}
-                                loadNextPage={loadNextPage}
-                                isFirstPage={dashboardState.pagination.isFirstPage}
-                                hasMore={
-                                    (dashboardState.pagination.currentPage * dashboardState.pagination.responsesPerPage) < allResponsesCache.length
-                                }
-                            />
-                        )}
-                    </div>
-                </div>
-            </main>
-        </div>
+  /* ══════════════════════════════════════════════════════════════
+     CHECK-IN TOGGLE
+  ══════════════════════════════════════════════════════════════ */
+  const updateRegistrationStatus = useCallback(async (id, checked_in) => {
+    // Optimistic update in UI
+    setAllRows(prev =>
+      prev.map(r => r.id === id ? { ...r, completed: checked_in } : r)
     );
+
+    const { error: sbError } = await supabase
+      .from('registrations')
+      .update({
+        checked_in,
+        checked_in_at: checked_in ? new Date().toISOString() : null,
+      })
+      .eq('id', id);
+
+    if (sbError) {
+      // Revert optimistic update
+      setAllRows(prev =>
+        prev.map(r => r.id === id ? { ...r, completed: !checked_in } : r)
+      );
+      setError(`Check-in update failed: ${sbError.message}`);
+    }
+  }, []);
+
+  /* ══════════════════════════════════════════════════════════════
+     ADD PARTICIPANT MANUALLY
+  ══════════════════════════════════════════════════════════════ */
+  const handleAddParticipant = useCallback(async (e) => {
+    e.preventDefault();
+    if (!newParticipant.name || !newParticipant.email) return;
+
+    setAddLoading(true);
+    const { data, error: sbError } = await supabase
+      .from('registrations')
+      .insert(participantToRow(newParticipant))
+      .select()
+      .single();
+
+    if (sbError) {
+      setError(`Could not add participant: ${sbError.message}`);
+    } else {
+      // Real-time will pick this up but we can pre-populate immediately
+      setAllRows(prev => [rowToResponse(data), ...prev]);
+      flash('Participant added successfully.');
+      setNewParticipant(EMPTY_PARTICIPANT);
+      setShowAddForm(false);
+    }
+
+    setAddLoading(false);
+  }, [newParticipant, flash]);
+
+  /* ══════════════════════════════════════════════════════════════
+     CSV UPLOAD  (bulk insert to Supabase)
+  ══════════════════════════════════════════════════════════════ */
+  const handleCsvUpload = useCallback(async () => {
+    if (!csvFile) {
+      setCsvStatus('Please select a CSV file first.');
+      return;
+    }
+
+    setCsvUploading(true);
+    setCsvStatus('Parsing CSV…');
+
+    Papa.parse(csvFile, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async ({ data, errors }) => {
+        if (errors.length > 0) {
+          setCsvStatus(`CSV parse error: ${errors[0].message}`);
+          setCsvUploading(false);
+          return;
+        }
+
+        const rows = data
+          .filter(r => r['Email Address'] && r['Name'])
+          .map(r => ({
+            full_name:  r['Name']            || '',
+            email:      r['Email Address']   || '',
+            phone:      r['Phone No.']       || '',
+            gender:     r['Gender']          || '',
+            age_group:  r['Age Group']       || '',
+            hear_about: r['How did you hear about this program'] || '',
+            church:     r['Church/Organization'] || '',
+            checked_in: false,
+          }));
+
+        if (rows.length === 0) {
+          setCsvStatus('No valid rows found. Ensure columns: Name, Email Address.');
+          setCsvUploading(false);
+          return;
+        }
+
+        setCsvStatus(`Uploading ${rows.length} records…`);
+
+        const { data: inserted, error: sbError } = await supabase
+          .from('registrations')
+          .insert(rows)
+          .select();
+
+        if (sbError) {
+          setCsvStatus(`Upload error: ${sbError.message}`);
+        } else {
+          const count = inserted?.length ?? rows.length;
+          setCsvStatus(`Done! ${count} records imported.`);
+          setAllRows(prev => [...(inserted ?? []).map(rowToResponse), ...prev]);
+          setCsvFile(null);
+          document.getElementById('csv-file').value = '';
+        }
+
+        setCsvUploading(false);
+      },
+      error: (err) => {
+        setCsvStatus(`Parse error: ${err}`);
+        setCsvUploading(false);
+      },
+    });
+  }, [csvFile]);
+
+  /* ══════════════════════════════════════════════════════════════
+     SEARCH
+  ══════════════════════════════════════════════════════════════ */
+  /* Live search — runs every time searchTerm or allRows changes */
+  useEffect(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) {
+      setIsSearching(false);
+      const start = (page - 1) * perPage;
+      setDisplayed(allRows.slice(start, start + perPage));
+      return;
+    }
+    setIsSearching(true);
+    const filtered = allRows.filter(r => {
+      const d = r.data;
+      return [d.name, d.email, d.phone, d.gender, d.ageGroup, d.organization, d.hearAbout]
+        .some(v => String(v ?? '').toLowerCase().includes(term));
+    });
+    setDisplayed(filtered);
+  }, [searchTerm, allRows, page, perPage]);
+
+  /* handleSearch kept as no-op so SearchBar prop contract stays satisfied */
+  const handleSearch = useCallback(() => {}, []);
+
+  const clearSearch = useCallback(() => {
+    setSearchTerm('');
+  }, []);
+
+  /* ── pagination handlers ── */
+  const loadNextPage = useCallback(() => {
+    if ((page * perPage) < allRows.length) setPage(p => p + 1);
+  }, [page, perPage, allRows.length]);
+
+  const loadPrevPage = useCallback(() => {
+    if (page > 1) setPage(p => p - 1);
+  }, [page]);
+
+  /* ── logout ── */
+  const handleLogout = useCallback(async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  }, [navigate]);
+
+  /* ══════════════════════════════════════════════════════════════
+     RENDER
+  ══════════════════════════════════════════════════════════════ */
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <header className="bg-white shadow">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <img src={LOGO} className="h-12 w-12 rounded-full" alt="Logo" />
+            <div>
+              <h1 className="text-lg lg:text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+              <p className="text-xs text-gray-400">Singles Connect 2026</p>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-600 text-sm text-white rounded-md hover:bg-red-700 transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <main className="py-6">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+
+          {/* Stats */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+            <StatsCard
+              title="Total Registrations"
+              value={stats.total}
+              bgColor="bg-blue-500"
+              icon={
+                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              }
+            />
+            <StatsCard
+              title="Checked In"
+              value={stats.checkedIn}
+              bgColor="bg-green-500"
+              icon={
+                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
+            />
+            <StatsCard
+              title="Not Yet Checked In"
+              value={stats.total - stats.checkedIn}
+              bgColor="bg-yellow-500"
+              icon={
+                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
+            />
+          </div>
+
+          {/* Participant Management */}
+          <div>
+            <h2 className="text-xl font-medium text-gray-900 mb-4">Participant Management</h2>
+
+            {successMsg && (
+              <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md text-sm">{successMsg}</div>
+            )}
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm flex justify-between">
+                <span>{error}</span>
+                <button onClick={() => setError(null)} className="font-bold ml-4">×</button>
+              </div>
+            )}
+
+            {/* Actions row */}
+            <div className="flex flex-col lg:flex-row w-full gap-5 items-start lg:items-center justify-between">
+              <CsvUploadForm
+                handleFileChange={(e) => setCsvFile(e.target.files[0])}
+                handleCsvUpload={handleCsvUpload}
+                csvFile={csvFile}
+                uploadStatus={csvStatus}
+                isUploading={csvUploading}
+              />
+
+              {/* <div className="flex gap-3 flex-wrap">
+                <button
+                  onClick={fetchAll}
+                  disabled={loading}
+                  className="px-4 py-2 text-sm bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50 transition-colors"
+                >
+                  {loading ? 'Loading…' : 'Refresh'}
+                </button>
+                <button
+                  onClick={() => setShowAddForm(!showAddForm)}
+                  className={`px-4 py-2 text-sm text-white rounded-md transition-colors ${
+                    showAddForm
+                      ? 'bg-red-500 hover:bg-red-600'
+                      : 'bg-green-600 hover:bg-green-700'
+                  }`}
+                >
+                  {showAddForm ? 'Cancel' : 'Add Participant'}
+                </button>
+              </div> */}
+            </div>
+
+            {/* Search + per-page */}
+            <div className="mt-4 flex flex-col sm:flex-row items-center gap-3">
+              <SearchBar
+                searchTerm={searchTerm}
+                handleSearchTermChange={(e) => setSearchTerm(e.target.value)}
+                handleSearch={handleSearch}
+                clearSearch={clearSearch}
+                isSearching={isSearching}
+              />
+              <div className="ml-auto">
+                <select
+                  value={perPage}
+                  onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
+                  className="rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                >
+                  {[5, 10, 20, 30].map(n => (
+                    <option key={n} value={n}>{n} per page</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Add form */}
+            {showAddForm && (
+              <AddParticipantForm
+                participant={newParticipant}
+                setParticipant={setNewParticipant}
+                handleSubmit={handleAddParticipant}
+                isSubmitting={addLoading}
+              />
+            )}
+
+            {/* Table */}
+            <ParticipantTable
+              responses={displayed}
+              loading={loading}
+              error={null}
+              currentPage={page}
+              responsesPerPage={perPage}
+              updateStatus={updateRegistrationStatus}
+            />
+
+            {/* Pagination */}
+            {!loading && displayed.length > 0 && !isSearching && (
+              <PaginationControls
+                loadPrevPage={loadPrevPage}
+                loadNextPage={loadNextPage}
+                isFirstPage={page === 1}
+                hasMore={(page * perPage) < allRows.length}
+              />
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 };
 
 export default AdminDashboard;

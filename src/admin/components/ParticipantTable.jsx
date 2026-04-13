@@ -1,158 +1,186 @@
-  import React from 'react';
+import React from 'react';
 
-  const ParticipantTable = ({ 
-    responses, 
-    loading, 
-    error, 
-    currentPage, 
-    responsesPerPage, 
-    updateStatus 
-  }) => {
-    // Helper function to safely get string values from potentially complex objects
-    const safeValue = (value) => {
-      if (value === null || value === undefined) {
-        return "";
-      }
-      
-      // If the value is an object with stringValue property (Firestore format)
-      if (typeof value === 'object' && value !== null && 'stringValue' in value) {
-        return value.stringValue;
-      }
-      
-      // If it's another kind of object, convert to string
-      if (typeof value === 'object' && value !== null) {
-        return String(value);
-      }
-      
-      return value;
-    };
+const GENDER_COLORS = {
+  Male:   'bg-blue-100 text-blue-800',
+  Female: 'bg-pink-100 text-pink-800',
+};
 
-    if (loading) {
-      return (
-        <div className="mt-6 bg-white shadow overflow-hidden rounded-lg p-6 text-center">
-          <div className="animate-pulse flex justify-center">
-            <div className="h-4 w-1/4 bg-gray-200 rounded"></div>
-          </div>
-          <div className="mt-4 animate-pulse">
-            <div className="h-4 w-full bg-gray-200 rounded mb-2.5"></div>
-            <div className="h-4 w-full bg-gray-200 rounded mb-2.5"></div>
-            <div className="h-4 w-full bg-gray-200 rounded mb-2.5"></div>
-          </div>
-        </div>
-      );
-    }
+const AGE_COLORS = {
+  '22-26': 'bg-purple-100 text-purple-700',
+  '27-30': 'bg-indigo-100 text-indigo-700',
+  '31-35': 'bg-teal-100 text-teal-700',
+  '36+':   'bg-orange-100 text-orange-700',
+};
 
-    if (error && !responses.length) {
-      return (
-        <div className="mt-6 bg-white shadow overflow-hidden rounded-lg p-6 text-center text-red-500">
-          Failed to load participants. Please try again.
-        </div>
-      );
-    }
+const safe = (v) => (v && v !== 'N/A' ? v : '—');
 
-    if (!responses || responses.length === 0) {
-      return (
-        <div className="mt-6 bg-white shadow overflow-hidden rounded-lg p-6 text-center text-gray-500">
-          No participants found.
-        </div>
-      );
-    }
+const Badge = ({ value, colorMap, fallback = 'bg-gray-100 text-gray-600' }) => (
+  <span className={`px-2 py-0.5 inline-flex text-xs font-semibold rounded-full ${colorMap?.[value] ?? fallback}`}>
+    {value && value !== 'N/A' ? value : '—'}
+  </span>
+);
 
+const ParticipantTable = ({
+  responses,
+  loading,
+  error,
+  currentPage,
+  responsesPerPage,
+  updateStatus,
+}) => {
+  if (loading) {
     return (
-      <div className="mt-6 bg-white shadow overflow-hidden rounded-lg">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
-                </th>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Phone
-                </th>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Organization
-                </th>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  City/State
-                </th>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Registration
-                </th>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {responses.map((response) => {
-                // Safely extract data with fallbacks
-                const name = safeValue(response.data?.name);
-                const email = safeValue(response.data?.email);
-                const phone = safeValue(response.data?.phone);
-                const organization = safeValue(response.data?.organization);
-                const city = safeValue(response.data?.city);
-                const state = safeValue(response.data?.state);
-
-                return (
-                  <tr key={response.id}>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {name}
-                    </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {email}
-                    </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {phone}
-                    </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {organization}
-                    </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {city}{city && state ? ', ' : ''}{state}
-                    </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {response.timestamp ? (() => {
-                        try {
-                          const date = new Date(response.timestamp);
-                          return !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Invalid Date';
-                        } catch (e) {
-                          console.error("Error formatting date:", response.timestamp, e);
-                          return 'Invalid Date';
-                        }
-                      })() : ''}
-                    </td>
-                    <td className="px-3 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        response.completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {response.completed ? 'Completed' : 'Pending'}
-                      </span>
-                    </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button
-                        onClick={() => updateStatus(response.id, !response.completed)}
-                        className={`px-3 py-1 rounded text-white text-xs ${
-                          response.completed ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
-                        }`}
-                      >
-                        {response.completed ? 'Mark Pending' : 'Mark Complete'}
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      <div className="mt-6 bg-white shadow rounded-lg p-6">
+        <div className="animate-pulse space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-4 bg-gray-200 rounded w-full" />
+          ))}
         </div>
       </div>
     );
-  };
+  }
 
-  export default ParticipantTable;
+  if (error && !responses.length) {
+    return (
+      <div className="mt-6 bg-white shadow rounded-lg p-6 text-center text-red-500 text-sm">
+        Failed to load participants. Please try again.
+      </div>
+    );
+  }
+
+  if (!responses || responses.length === 0) {
+    return (
+      <div className="mt-6 bg-white shadow rounded-lg p-6 text-center text-gray-400 text-sm">
+        No participants found.
+      </div>
+    );
+  }
+
+  const offset = (currentPage - 1) * responsesPerPage;
+
+  return (
+    <div className="mt-6 bg-white shadow rounded-lg overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 text-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              {[
+                '#',
+                'Name',
+                'Phone',
+                'Email',
+                'Age Group',
+                'Gender',
+                'Church / Org',
+                'Heard From',
+                'Registered',
+                'Status',
+                'Action',
+              ].map((col) => (
+                <th
+                  key={col}
+                  className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                >
+                  {col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody className="bg-white divide-y divide-gray-100">
+            {responses.map((r, i) => {
+              const d = r.data ?? {};
+              return (
+                <tr
+                  key={r.id}
+                  className={r.completed ? 'bg-green-50' : 'hover:bg-gray-50'}
+                >
+                  {/* # */}
+                  <td className="px-3 py-3 text-gray-400 whitespace-nowrap">
+                    {offset + i + 1}
+                  </td>
+
+                  {/* Name */}
+                  <td className="px-3 py-3 font-medium text-gray-900 whitespace-nowrap">
+                    {safe(d.name)}
+                  </td>
+
+                  {/* Phone */}
+                  <td className="px-3 py-3 text-gray-600 whitespace-nowrap">
+                    {safe(d.phone)}
+                  </td>
+
+                  {/* Email */}
+                  <td className="px-3 py-3 text-gray-600 whitespace-nowrap">
+                    {safe(d.email)}
+                  </td>
+
+                  {/* Age Group */}
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    <Badge value={d.ageGroup} colorMap={AGE_COLORS} />
+                  </td>
+
+                  {/* Gender */}
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    <Badge value={d.gender} colorMap={GENDER_COLORS} />
+                  </td>
+
+                  {/* Church / Org */}
+                  <td className="px-3 py-3 text-gray-600 max-w-[160px] truncate">
+                    {safe(d.organization)}
+                  </td>
+
+                  {/* Heard From */}
+                  <td className="px-3 py-3 text-gray-500 max-w-[140px] truncate">
+                    {safe(d.hearAbout)}
+                  </td>
+
+                  {/* Registered date */}
+                  <td className="px-3 py-3 text-gray-500 whitespace-nowrap">
+                    {r.timestamp
+                      ? (() => {
+                          try {
+                            const d = new Date(r.timestamp);
+                            return isNaN(d) ? '—' : d.toLocaleDateString('en-GB');
+                          } catch { return '—'; }
+                        })()
+                      : '—'}
+                  </td>
+
+                  {/* Status badge */}
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    {r.completed ? (
+                      <span className="px-2 py-0.5 inline-flex text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                        ✓ Checked In
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 inline-flex text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                      </span>
+                    )}
+                  </td>
+
+                  {/* Action */}
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    <button
+                      onClick={() => updateStatus(r.id, !r.completed)}
+                      className={`px-3 py-1 rounded text-white text-xs font-medium transition-colors ${
+                        r.completed
+                          ? 'bg-yellow-500 hover:bg-yellow-600'
+                          : 'bg-green-600 hover:bg-green-700'
+                      }`}
+                    >
+                      {r.completed ? 'Undo Check-in' : 'Check In'}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default ParticipantTable;
