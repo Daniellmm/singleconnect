@@ -24,7 +24,7 @@ const rowToResponse = (row) => ({
     phone:        row.phone      ?? 'N/A',
     ageGroup:     row.age_group  ?? 'N/A',
     hearAbout:    row.hear_about ?? 'N/A',
-    colour:       row.colour     ?? 'N/A',
+    Colour:       row.Colour     ?? 'N/A',
   },
   timestamp:  row.created_at,
   completed:  row.checked_in    ?? false,
@@ -41,7 +41,7 @@ const participantToRow = (p) => ({
   age_group:  p.ageGroup   || '',
   hear_about: p.referral   || '',
   church:     p.organization || '',
-  colour:     p.colour || '', 
+  Colour:     p.Colour || '', 
   checked_in: false,
 });
 
@@ -70,7 +70,7 @@ const AdminDashboard = () => {
 
   /* ── add form ── */
   const EMPTY_PARTICIPANT = {
-    name: '', email: '', phone: '', gender: '', ageGroup: '', organization: '', referral: '', colour: '',
+    name: '', email: '', phone: '', gender: '', ageGroup: '', organization: '', referral: '', Colour: '',
   };
   const [showAddForm,    setShowAddForm]    = useState(false);
   const [newParticipant, setNewParticipant] = useState(EMPTY_PARTICIPANT);
@@ -245,7 +245,7 @@ const AdminDashboard = () => {
             age_group:  r['Age Group']       || '',
             hear_about: r['How did you hear about this program'] || '',
             church:     r['Church/Organization'] || '',
-            colour:     r['Colour'] || '',
+            Colour:     r['Colour'] || '',
             checked_in: false,
           }));
 

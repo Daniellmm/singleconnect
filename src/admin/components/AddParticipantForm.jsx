@@ -119,7 +119,7 @@ const AddParticipantForm = ({ participant, setParticipant, handleSubmit, isSubmi
         <input
             type="text"
             name="colour"
-            value={participant.colour}
+            value={participant.Colour}
             onChange={handleChange}
             placeholder="e.g. Red, Blue, VIP"
             className={field}

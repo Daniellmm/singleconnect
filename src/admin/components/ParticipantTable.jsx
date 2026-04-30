@@ -138,7 +138,7 @@ const ParticipantTable = ({
 
                   {/* Colour */}
                     <td className="px-3 py-3 text-gray-700 whitespace-nowrap">
-                    {safe(d.colour)}
+                    {safe(d.Colour)}
                     </td>
 
                   {/* Registered date */}
