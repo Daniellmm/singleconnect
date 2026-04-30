@@ -920,7 +920,7 @@ const RegistrationSection = () => {
         gender: form.gender,
         hear_about: form.hearAboutUs,
         church: form.church,
-        colour: color, // NOTE: Supabase uses "colour"
+        Colour: color, // NOTE: Supabase uses "colour"
       });
   
       if (sbError) throw sbError;
