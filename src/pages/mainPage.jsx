@@ -402,7 +402,7 @@ const SpeakerCard = ({ speaker, index }) => {
         <img
           src={speaker.photo}
           alt={displayName}
-          "w-full h-full object-contain group-hover:scale-105 transition duration-500"
+          className="w-full h-full object-contain group-hover:scale-105 transition duration-500"
         />
         <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-brand-card to-transparent" />
       </div>
