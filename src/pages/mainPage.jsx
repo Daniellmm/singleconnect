@@ -688,7 +688,7 @@ const TestimonialsSection = () => (
         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-7">
+      <div className="grid md:grid-cols-2 gap-7">
         {testimonials.map((t, i) => (
           <TestimonialCard key={i} {...t} />
         ))}
