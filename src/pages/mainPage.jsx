@@ -7,7 +7,7 @@ import BackImg   from '../assets/heroBg.jpg';
 import AboutImg  from '../assets/aboutImg.jpg';
 
 import RevSam   from '../assets/samson.jpg';
-import RevSte  from '../assets/stella.png';
+import RevSte  from '../assets/stella.jpg';
 
 import Gal21   from '../assets/2021.jpeg';
 import Gal23  from '../assets/2023.jpg';
@@ -805,12 +805,11 @@ const GallerySection = () => (
    9. SPONSORS / PARTNERS
 ═══════════ */
 const partners = [
-  { name: 'MTN Nigeria',                 category: 'Telecom & Digital Services' },
-  { name: 'Adorn Homes',                 category: 'Real Estate' },
-  { name: 'Food Brand (TBC)',            category: 'Refreshments & Dining' },
-  { name: 'First Bank',                  category: 'Banking & Finance' },
-  { name: 'Dominican University',        category: 'University Partner' },
-  { name: 'Precious Cornerstone University', category: 'University Partner' },
+  { name: 'Access Bank',                 category: 'Banking & Finance' },
+  { name: 'Ire Ayo Crown',               category: 'Food Enterprise' },
+  { name: 'Orobs Photography',           category: 'Architect & Engineering Firm' },
+  { name: 'PEAPEN Travels Nigeria',      category: 'Travel and Study Agency' },
+  { name: 'Metro Meet',                  category: 'NGO' },
 ];
 
 const SponsorsSection = () => (
