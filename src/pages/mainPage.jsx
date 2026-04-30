@@ -17,8 +17,9 @@ import Gal25  from '../assets/2025.jpg';
 
 
 import {
-  FaFacebookF, FaInstagram, FaTwitter, FaEnvelope, FaPhone,
+  FaFacebookF, FaYoutube, FaEnvelope, FaPhone,
 } from 'react-icons/fa';
+import { SiTiktok, SiX } from 'react-icons/si';
 import {
   HiOutlineLightBulb, HiOutlineChatAlt2, HiOutlineUserGroup,
   HiOutlineEmojiHappy, HiOutlineCamera, HiOutlineClock,
@@ -770,9 +771,12 @@ const GallerySection = () => (
             className={`reveal glass-card rounded-2xl overflow-hidden group hover:-translate-y-2 transition-all duration-300 block`}
             style={{ transitionDelay: `${i * 100}ms` }}
           >
-            {/* Fake photo placeholder */}
-            <div className={`h-52 bg-gradient-to-br ${gradient} flex items-center justify-center relative`}>
-              <span className="text-8xl font-black text-white/10">{year}</span>
+            <div className="h-52 relative overflow-hidden rounded-t-2xl">
+              <img
+                src={albums[i].image} // or just `image` from destructuring
+                alt={`${label} Gallery`}
+                className="w-full h-full object-cover"
+              />
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-brand-dark/40">
                 <span className="text-white text-sm font-semibold tracking-widest uppercase flex items-center gap-2">
                   View Photos <HiArrowRight />
@@ -1221,8 +1225,9 @@ const FooterSection = () => (
           <div className="flex gap-4 mt-6">
             {[
               { Icon: FaFacebookF, href: 'https://www.facebook.com/menofissacharvision' },
-              { Icon: FaInstagram, href: 'https://www.facebook.com/menofissacharvision' },
-              { Icon: FaTwitter,   href: 'https://x.com/mivupdate' },
+              { Icon: SiTiktok, href: 'https://www.tiktok.com/@miv_update' },
+              { Icon: SiX,   href: 'https://x.com/mivupdate' },
+              { Icon: FaYoutube,   href: 'https://www.youtube.com/@MIVIbadan' },
             ].map(({ Icon, href }) => (
               <a
                 key={href}
