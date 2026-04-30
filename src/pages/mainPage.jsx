@@ -807,7 +807,8 @@ const GallerySection = () => (
 const partners = [
   { name: 'Access Bank',                 category: 'Banking & Finance' },
   { name: 'Ire Ayo Crown',               category: 'Food Enterprise' },
-  { name: 'Orobs Photography',           category: 'Architect & Engineering Firm' },
+  { name: 'Swift Architecture',          category: 'Architect & Engineering Firm' },
+  { name: 'Orobs Photography',           category: 'Media' },
   { name: 'PEAPEN Travels Nigeria',      category: 'Travel and Study Agency' },
   { name: 'Metro Meet',                  category: 'NGO' },
 ];
