@@ -73,6 +73,7 @@ const ParticipantTable = ({
                 'Gender',
                 'Church / Org',
                 'Heard From',
+                'Colour',
                 'Registered',
                 'Status',
                 'Action',
@@ -134,6 +135,11 @@ const ParticipantTable = ({
                   <td className="px-3 py-3 text-gray-500 max-w-[140px] truncate">
                     {safe(d.hearAbout)}
                   </td>
+
+                  {/* Colour */}
+                    <td className="px-3 py-3 text-gray-700 whitespace-nowrap">
+                    {safe(d.colour)}
+                    </td>
 
                   {/* Registered date */}
                   <td className="px-3 py-3 text-gray-500 whitespace-nowrap">

@@ -6,6 +6,16 @@ import { supabase } from '../supabase';
 import BackImg   from '../assets/heroBg.jpg';
 import AboutImg  from '../assets/aboutImg.jpg';
 
+import RevSam   from '../assets/samson.jpg';
+import RevSte  from '../assets/stella.png';
+
+import Gal21   from '../assets/2021.jpeg';
+import Gal23  from '../assets/2023.jpg';
+import Gal24  from '../assets/2024.jpg';
+import Gal25  from '../assets/2025.jpg';
+
+
+
 import {
   FaFacebookF, FaInstagram, FaTwitter, FaEnvelope, FaPhone,
 } from 'react-icons/fa';
@@ -85,7 +95,7 @@ const HeroSection = () => {
         </p>
 
         <p className="text-brand-muted text-xs sm:text-sm md:text-base font-medium mb-8 sm:mb-10 animate-fade-in leading-relaxed px-2">
-          Saturday, May 2, 2026<br className="sm:hidden" />
+          Saturday, May 16, 2026<br className="sm:hidden" />
           <span className="hidden sm:inline"> &nbsp;|&nbsp; </span>
           10:00 AM – 4:00 PM (WAT)<br className="sm:hidden" />
           <span className="hidden sm:inline"> &nbsp;|&nbsp; </span>
@@ -169,14 +179,27 @@ const AboutSection = () => (
           safe, sane environment.
         </p>
 
-        <blockquote className="border-l-4 border-brand-gold pl-5 py-1 bg-brand-gold/5 rounded-r-lg mb-6">
+        <blockquote className="border-l-4 border-brand-gold pl-5 py-3 bg-brand-gold/5 rounded-r-lg mb-6">
           <p className="text-brand-dark/80 italic text-sm leading-relaxed">
-            "Singles Connect started six years ago as a vision to unite Christian singles
-            in purposeful fellowship. The maiden edition was featured between three persons
-            Bolu Ajetomobi and Deborah Iteghei (now in Qatar) with memorable activities:
-            dinner nights, outings to IITA, UI Botanical Garden, and more."
+            Singles Connect began six years ago as a vision to unite Christian singles
+            in purposeful fellowship. What started with just three people has grown into
+            a thriving annual gathering filled with meaningful connections and shared experiences.
           </p>
         </blockquote>
+
+        <p className="text-brand-dark/70 text-sm leading-relaxed mb-5">
+          Over the years, the event has featured memorable moments including dinner nights,
+          outings to IITA and the UI Botanical Garden, and engaging activities that foster
+          genuine relationships. Each edition now welcomes hundreds of attendees, with lives
+          consistently impacted and anticipation growing year after year.
+        </p>
+
+        <p className="text-brand-dark/70 text-sm leading-relaxed mb-6">
+          Singles Connect has also hosted seasoned relationship coaches and sexual purity
+          advocates, including Pastor Victor Olukoju (PVO), author of “Letter from my Father”
+          and convener of “SONDA Day”, as well as Pastor Anwinli Ojeikere (The Winlos),
+          co-host of “MRC Experience” and co-author of the best-selling book “His Ex, Her Ex”.
+        </p>
 
         <p className="text-brand-dark/60 text-sm mb-8">
           Join us in 2026 to be part of this growing movement!
@@ -197,9 +220,9 @@ const AboutSection = () => (
    3. EVENT DETAILS
 ══════════════════════════════════════════════════════════════════ */
 const eventDetails = [
-  { icon: HiOutlineClock,           label: 'Date & Time',    value: 'Saturday, May 2, 2026', sub: '10:00 AM – 4:00 PM (WAT)' },
-  { icon: HiOutlineLocationMarker,  label: 'Venue',          value: 'Ibadan, Nigeria',        sub: 'Full address coming soon' },
-  { icon: HiOutlineUsers,           label: 'For',            value: 'Singles 21–40',          sub: 'Faith-based young adults' },
+  { icon: HiOutlineClock,           label: 'Date & Time',    value: 'Saturday, May 16, 2026', sub: '10:00 AM (WAT)' },
+  { icon: HiOutlineLocationMarker,  label: 'Venue',          value: 'Ibadan, Nigeria',        sub: 'RACE COURSE LOUNGE Gate 1, Adamasigba Stadium, Opposite Ibadan Recreation Club, main Gate.' },
+  { icon: HiOutlineUsers,           label: 'For',            value: 'Singles of marriageable age 21–40',          sub: 'Faith-based young adults' },
   { icon: HiOutlineTicket,          label: 'Admission',      value: 'Free Entry',             sub: 'Registration required' },
 ];
 
@@ -226,6 +249,26 @@ const EventDetailsSection = () => (
             <p className="text-brand-muted text-sm">{sub}</p>
           </div>
         ))}
+      </div>
+
+
+      <div className="mt-12 reveal">
+        <div className="rounded-2xl overflow-hidden border border-white/10 shadow-lg">
+          <iframe
+            title="Event Location Map"
+            src="https://www.google.com/maps?q=Race%20Course%20Lounge%20Gate%201%20Adamasigba%20Stadium%20Ibadan&output=embed"
+            width="100%"
+            height="350"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+
+        <p className="text-center text-brand-muted text-xs mt-3">
+          Race Course Lounge Gate 1, Adamasigba Stadium, Ibadan
+        </p>
       </div>
     </div>
   </section>
@@ -316,103 +359,79 @@ const ExpectSection = () => (
    5. SPEAKERS
 ════════ */
 const speakers = [
-  {
-    name: 'Moroluwatiketike Abolaji-Adeola',
-    shortName: 'Moroluwatiketike',
-    role: 'Host / MC',
-    bio: 'Prominent Nigerian gospel movie actress, entrepreneur, Event Compere/MC, Certified Voice-Over Talent and Christian content creator popularly known for her "Mummy Pastor" comedy skits. Holds a Second-Class Upper degree in Mass Communication from JABU. Happily married to Pastor Abolaji Adeola (RCCG), and blessed with two children.',
-    photo: null,
-    accentColor: 'border-brand-gold',
-    labelColor: 'text-brand-gold',
-  },
-  {
-    name: 'Nifemi Olawande',
-    shortName: 'Nifemi Olawande',
-    role: 'Speaker',
-    bio: 'Bio coming soon.',
-    photo: null,
-    accentColor: 'border-brand-rose',
-    labelColor: 'text-brand-rose',
-  },
-  {
-    name: 'Darasimi Oyor',
-    shortName: 'Darasimi Oyor',
-    role: 'Speaker',
-    bio: 'Bio coming soon.',
-    photo: null,
-    accentColor: 'border-brand-purple-light',
-    labelColor: 'text-brand-purple-light',
-  },
-  {
-    name: 'Tolulope Mike-Bamiloye',
-    shortName: 'Tolulope Mike-Bamiloye',
-    role: 'Speaker',
-    bio: 'Bio coming soon.',
-    photo: null,
-    accentColor: 'border-brand-teal',
-    labelColor: 'text-brand-teal',
-  },
-  {
-    name: 'Emmanuella Mike-Bamiloye',
-    shortName: 'Emmanuella Mike-Bamiloye',
-    role: 'Speaker',
-    bio: 'Bio coming soon.',
-    photo: null,
-    accentColor: 'border-brand-rose',
-    labelColor: 'text-brand-rose',
-  },
-  {
-    name: 'PVO',
-    shortName: 'PVO',
-    role: 'Speaker',
-    bio: 'Bio coming soon.',
-    photo: null,
-    accentColor: 'border-brand-gold',
-    labelColor: 'text-brand-gold',
-  },
+    {
+        name: 'Rev Samson Ajetomobi',
+        shortName: null,
+        role: 'Host',
+        bio: `
+        Rev. Samson Ajetomobi, the President of The Men of Issachar Vision Incorporated (MIV) and the Overseer of the Redemption Faith Churches is a man called by God with the mandate to reach the unreached at all cost and reawaken the Church to her responsibilities. Rev. Ajetomobi, a trained Agricultural Engineer is a certified Professional Manager who is a member of the International Professional Managers Association (United Kingdom) and a fellow of Certified International Professional Managers. He is also a member of the Development Associate Institute and an alumnus of Haggai Institute (Maui, U.S.A.). 
+        Having been married to Rev. Stella Ajetomobi for decades and blessed with four young adults, Rev. Samson founded and coordinates the Issachar School of Marriage and the Family Healing Season Conference to help believers lead their homes as God intends.
+        `,
+        photo: RevSam,
+        accentColor: 'border-brand-gold',
+        labelColor: 'text-brand-gold',
+      },
+      {
+        name: 'Rev Stella Ajetomobi',
+        shortName: null,
+        role: 'Host',
+        bio: `
+        Rev. Stellamaris Ajetomobi is the Vice President of The Men of Issachar Vision Inc. with the headquarters in Ibadan. She is a seasoned woman of God who has been supporting her husband in Ministry right from inception. 
+        She has passion for teaching and preaching Christian character, discipleship and missions. She is the author of life changing books such as Dressing for Your Destination, Solitude, Bridging the Gap among others. Rev. Stella is the host of Back to Bethel Retreats, a specialized retreat for ministers' wives, elect ladies and female leaders across different locations. 
+        She is married to Rev. Samson Ajetomobi and they are blessed with four children.
+        `,
+        photo: RevSte,
+        accentColor: 'border-brand-gold',
+        labelColor: 'text-brand-gold',
+      },
 ];
 
 const SpeakerCard = ({ speaker, index }) => {
-  const initials = speaker.shortName
-    .split(' ')
-    .map(w => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+  const [expanded, setExpanded] = useState(false);
+
+  const displayName = speaker.shortName || speaker.name;
 
   return (
     <div
       className={`reveal glass-card rounded-2xl overflow-hidden hover:-translate-y-2 transition-all duration-400 group border-t-2 ${speaker.accentColor}`}
       style={{ transitionDelay: `${index * 80}ms` }}
     >
-      {/* Photo / initials placeholder */}
-      <div className="relative h-56 bg-gradient-to-br from-brand-card to-brand-darker flex items-center justify-center overflow-hidden">
-        {speaker.photo ? (
-          <img src={speaker.photo} alt={speaker.shortName} className="w-full h-full object-cover" />
-        ) : (
-          <>
-            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent" />
-            {/* <span className={`text-6xl font-black ${speaker.labelColor} opacity-40`}>{initials}</span> */}
-          </>
-        )}
-        <div className={`absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-brand-card to-transparent`} />
+      {/* Image */}
+      <div className="relative h-56 overflow-hidden">
+        <img
+          src={speaker.photo}
+          alt={displayName}
+          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+        />
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-brand-card to-transparent" />
       </div>
 
+      {/* Content */}
       <div className="p-6">
         <p className={`text-xs font-semibold uppercase tracking-widest mb-1 ${speaker.labelColor}`}>
           {speaker.role}
         </p>
+
         <h3 className="text-white font-bold text-base leading-snug mb-3">
-          {speaker.shortName}
+          {displayName}
         </h3>
-        {speaker.bio !== 'Bio coming soon.' && (
-          <p className="text-white/50 text-xs leading-relaxed line-clamp-4">
-            {speaker.bio}
-          </p>
-        )}
-        {speaker.bio === 'Bio coming soon.' && (
-          <p className="text-white/30 text-xs italic">Bio & photo coming soon</p>
-        )}
+
+        {/* Bio */}
+        <p
+          className={`text-white/60 text-xs leading-relaxed transition-all duration-300 ${
+            expanded ? '' : 'line-clamp-4'
+          }`}
+        >
+          {speaker.bio}
+        </p>
+
+        {/* Toggle */}
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-3 text-xs text-brand-gold font-semibold hover:underline"
+        >
+          {expanded ? 'Read less' : 'Read more'}
+        </button>
       </div>
     </div>
   );
@@ -431,7 +450,7 @@ const SpeakersSection = () => (
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-7">
         {speakers.map((speaker, i) => (
           <SpeakerCard key={speaker.name} speaker={speaker} index={i} />
         ))}
@@ -444,16 +463,16 @@ const SpeakersSection = () => (
    6. SCHEDULE
 ═════ */
 const schedule = [
-  { time: '10:00 AM – 10:30 AM', session: 'Arrival & Registration',       sub: 'Welcome Cocktail Hour',           accent: 'gold' },
-  { time: '10:30 AM – 11:00 AM', session: 'Opening Ceremony',              sub: 'Welcome & Worship',               accent: 'rose' },
-  { time: '11:00 AM – 12:00 PM', session: 'Main Teaching',                 sub: 'Minister of the Day',             accent: 'purple' },
-  { time: '12:00 PM – 12:45 PM', session: 'Age-Based Networking',          sub: 'Focused group conversations',     accent: 'teal' },
-  { time: '12:45 PM',            session: 'Testimony Time',                sub: '',                                accent: 'gold' },
-  { time: '1:00 PM',             session: 'Lunch & Exhibition Hour',       sub: 'Dining & Partner Showcase',       accent: 'rose' },
-  { time: '2:00 PM',             session: 'Panel Discussion',              sub: 'Live Q&A Session',                accent: 'purple' },
-  { time: '3:15 PM',             session: 'Games & Group Activities',      sub: 'Break the ice, spark connection', accent: 'teal' },
-  { time: '3:45 PM',             session: 'Closing Remarks & Prayer',      sub: '',                                accent: 'gold' },
-  { time: '4:00 PM',             session: 'Official Close',                sub: 'Informal Mingling',               accent: 'rose' },
+  { time: '10:00 AM', session: 'Arrival & Registration',       sub: 'Welcome Cocktail Hour',           accent: 'gold' },
+  { time: '10:30 AM', session: 'Opening Ceremony',             sub: 'Welcome & Worship',               accent: 'rose' },
+  { time: '11:00 AM', session: 'Age-Based Networking',         sub: 'Focused group conversations',     accent: 'teal' },
+  { time: '12:00 PM', session: 'Teaching',                     sub: '',                                accent: 'gold' },
+  { time: '12:45 PM', session: 'Testimony Time',               sub: '',                                accent: 'gold' },
+  { time: '1:00 PM',  session: 'Lunch & Exhibition Hour',      sub: 'Dining & Partner Showcase',       accent: 'rose' },
+  { time: '2:00 PM',  session: 'Panel Discussion',             sub: 'Live Q&A Session',                accent: 'purple' },
+  { time: '3:15 PM',  session: 'Games & Group Activities',     sub: 'Break the ice, spark connection', accent: 'teal' },
+  { time: '3:45 PM',  session: 'Closing Remarks & Prayer',     sub: '',                                accent: 'gold' },
+  { time: '4:00 PM',  session: 'Official Close',               sub: 'Informal Mingling',               accent: 'rose' },
 ];
 
 const scheduleAccent = {
@@ -503,7 +522,7 @@ const ScheduleSection = () => (
         <SectionHeading>
           The <span className="text-brand-rose">Lineup</span>
         </SectionHeading>
-        <p className="text-brand-muted mt-4 text-sm tracking-wide">Saturday, May 2, 2026 &nbsp;·&nbsp; Ibadan, Nigeria</p>
+        <p className="text-brand-muted mt-4 text-sm tracking-wide">Saturday, May 16, 2026 &nbsp;·&nbsp; Ibadan, Nigeria</p>
       </div>
 
       {/* ── Desktop: alternating zigzag ── */}
@@ -588,8 +607,21 @@ const ScheduleSection = () => (
 ═══════ */
 const testimonials = [
   {
-    quote: "I came not knowing what to expect, and left with three genuine friends and a completely new perspective on singleness. It wasn't a 'find a spouse' event it was a 'find yourself' event. Completely life changing.",
-    name: 'Adunola',
+    quote: `I met her during “Singles Connect” last year. I was one of the workers at the conference, when I first saw her coming in through the door. There was nothing overly dramatic about the moment, just a simple introduction, a few light jokes, and a brief conversation.
+
+    As she walked in (through the door the second time), I jokingly told her that I was going to collect her number the next time I saw her during the program. At the time, it felt like just one of those playful things you say in the moment, not something I was seriously planning to follow through on. But later, when I saw her leaving, something in me changed. I suddenly remembered my “promise,” and before I could overthink it, I found myself running after her.
+    
+    I caught up with her and asked for her number. Surprisingly, she gave it to me. I didn’t think much of it then, I honestly just wanted to be friends. There was no big plan, no deep intention, just a simple desire to stay connected with someone who seemed interesting and easy to talk to. Much later, after we had already grown close, she told me that she had actually been reluctant to give me her number that day. 
+    
+    Our first conversation over text was awkward, to say the least. It didn’t flow naturally, and by the end of that first day, I had already made up my mind that I wasn’t going to message her again. I felt it just wasn’t worth forcing something that didn’t seem to click.
+    
+    But then the next day, I saw her reply to my last message from the previous day, and then opened a door to a new conversation, and this time, it flowed. What started as a simple exchange turned into something more engaging.
+    
+    From there, everything began to change. We talked more often. Without even realizing it, we were growing closer day by day.
+    
+    What I initially saw as just a casual friendship slowly turned into something deeper. The connection became stronger. We found ourselves in a relationship.
+    `,
+    name: null,
     tag: 'Ibadan · 2025 edition',
     accent: 'border-brand-gold',
     quoteColor: 'text-brand-gold/30',
@@ -601,58 +633,82 @@ const testimonials = [
     accent: 'border-brand-rose',
     quoteColor: 'text-brand-rose/30',
   },
-  {
-    quote: "My husband and I actually connected at a church event similar to this one. Singles Connect creates the kind of environment where that's relaxed, intentional, and full of real people.",
-    name: 'Blessing & Femi',
-    tag: 'Couple Testimony',
-    accent: 'border-brand-purple-light',
-    quoteColor: 'text-brand-purple-light/30',
-  },
 ];
+
+const TestimonialCard = ({ quote, name, tag, accent, quoteColor }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  const displayName = name || 'Anonymous';
+
+  const isLong = quote.length > 280;
+
+  return (
+    <div
+      className={`reveal glass-card rounded-2xl p-8 flex flex-col gap-5 border-l-4 ${accent} hover:-translate-y-2 transition-all duration-300`}
+    >
+      <span className={`${quoteColor} text-7xl font-black leading-none -mb-4`}>
+        "
+      </span>
+
+      <p className="text-white/80 text-sm leading-relaxed">
+        {expanded || !isLong ? quote : quote.slice(0, 280) + '...'}
+      </p>
+
+      {isLong && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="text-xs text-brand-gold font-semibold hover:underline self-start"
+        >
+          {expanded ? 'Read less' : 'Read more'}
+        </button>
+      )}
+
+      <div>
+        <p className="text-white font-semibold text-sm">— {displayName}</p>
+        <p className="text-brand-muted text-xs mt-0.5">{tag}</p>
+      </div>
+    </div>
+  );
+};
 
 const TestimonialsSection = () => (
   <section id="testimonials" className="bg-brand-dark py-28 px-6 lg:px-10 overflow-hidden">
     <div className="max-w-7xl mx-auto">
+
       <div className="text-center mb-16 reveal">
         <SectionLabel>Testimonials</SectionLabel>
         <SectionHeading>
           Stories That <span className="text-brand-gold">Inspire</span>
         </SectionHeading>
+
         <p className="text-brand-muted mt-4 max-w-2xl mx-auto text-sm leading-relaxed">
           Singles Connect has been a turning point for many. Friendships formed.
-          Perspectives shifted. A few love stories began. Read what past attendees
-          have said and imagine what your story could be.
+          Perspectives shifted. A few love stories began.
         </p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-7">
-        {testimonials.map(({ quote, name, tag, accent, quoteColor }, i) => (
-          <div
-            key={i}
-            className={`reveal glass-card rounded-2xl p-8 flex flex-col gap-5 border-l-4 ${accent} hover:-translate-y-2 transition-all duration-300`}
-            style={{ transitionDelay: `${i * 100}ms` }}
-          >
-            {/* Large quote mark */}
-            <span className={`${quoteColor} text-7xl font-black leading-none -mb-4`}>"</span>
-            <p className="text-white/80 text-sm leading-relaxed flex-1">{quote}</p>
-            <div>
-              <p className="text-white font-semibold text-sm">— {name}</p>
-              <p className="text-brand-muted text-xs mt-0.5">{tag}</p>
-            </div>
-          </div>
+        {testimonials.map((t, i) => (
+          <TestimonialCard key={i} {...t} />
         ))}
       </div>
 
-      {/* CTA to share story */}
-      {/* <div className="text-center mt-14 reveal">
-        <p className="text-brand-muted text-sm mb-4">Have a story from a past edition?</p>
+      {/* WhatsApp CTA */}
+      <div className="text-center mt-14 reveal">
+        <p className="text-brand-muted text-sm mb-4">
+          Have a story from a past edition?
+        </p>
+
         <a
-          href="mailto:hello@singlesconnect.ng?subject=My Singles Connect Story"
-          className="btn-gold text-sm"
+          href="https://wa.me/2348160310828?text=Hi%20Singles%20Connect%2C%0A%0AI%20would%20like%20to%20share%20my%20testimony.%0A%0AName%3A%20%0ALocation%3A%20%0AYear%20attended%3A%20%0AStory%3A%20"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-gold text-sm inline-flex items-center gap-2"
         >
-          Share Your Story <HiArrowRight className="inline" />
+          Share Your Story on WhatsApp
         </a>
-      </div> */}
+      </div>
+
     </div>
   </section>
 );
@@ -662,24 +718,31 @@ const TestimonialsSection = () => (
 ════════ */
 const albums = [
   {
+    year: '2021',
+    label: "Singles' Connect 2021",
+    desc: 'The beginning of a movement that grew into something powerful.',
+    image: Gal21,
+    gradient: 'from-brand-purple/30 to-brand-purple/5',
+  },
+  {
     year: '2023',
     label: "Singles' Connect 2023",
     desc: 'The edition that set the standard. Great moments, great people.',
-    href: 'https://photos.app.goo.gl/singlesconnect2023',
+    image: Gal23,
     gradient: 'from-brand-gold/30 to-brand-gold/5',
   },
   {
     year: '2024',
     label: "Singles Connect '24",
     desc: 'Bigger, bolder, and more impactful than ever.',
-    href: 'https://photos.app.goo.gl/singlesconnect2024',
+    image: Gal24,
     gradient: 'from-brand-rose/30 to-brand-rose/5',
   },
   {
     year: '2025',
     label: 'SC 2025',
     desc: 'The most recent chapter — watch the highlights.',
-    href: 'https://photos.app.goo.gl/singlesconnect2025',
+    image: Gal25,
     gradient: 'from-brand-purple/30 to-brand-purple/5',
   },
 ];
@@ -751,14 +814,24 @@ const SponsorsSection = () => (
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-16 reveal">
         <SectionLabel>Exhibition & Partners</SectionLabel>
+
         <SectionHeading light={false}>
           Brands That Believe <br />
           <span className="text-brand-rose">in Your Future</span>
         </SectionHeading>
+
         <p className="text-brand-dark/60 mt-4 max-w-2xl mx-auto text-sm leading-relaxed">
           We&apos;ve curated a select group of brands that serve and empower young adults.
           Meet them at our exhibition floor to explore products, services, and opportunities
           designed for where you&apos;re going.
+        </p>
+
+        {/* Contact */}
+        <p className="mt-5 text-brand-dark text-sm font-medium">
+          For partnership enquiries:
+          <span className="block mt-1 text-brand-rose font-semibold">
+            08160310828 • 08138025927
+          </span>
         </p>
       </div>
 
@@ -778,13 +851,15 @@ const SponsorsSection = () => (
         ))}
       </div>
 
-      {/* <div className="text-center mt-12 reveal">
-        <p className="text-brand-dark/50 text-sm mb-3">Interested in partnering with us?</p>
-        <a href="mailto:hello@singlesconnect.ng?subject=Partnership Enquiry" className="btn-rose text-sm">
-          Become a Partner
+      <div className="text-center mt-12 reveal">
+        <a
+          href="tel:08160310828"
+          className="btn-rose text-sm inline-block"
+        >
+          Partner Now
         </a>
-      </div> */}
-    </div>
+      </div>
+      </div>
   </section>
 );
 
@@ -814,29 +889,57 @@ const RegistrationSection = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
     const { fullName, phone, email, ageGroup, gender } = form;
+  
     if (!fullName || !phone || !email || !ageGroup || !gender) {
       setError('Please fill in all required fields.');
       return;
     }
+  
     setLoading(true);
+  
     try {
+      // STEP 1: Get color from API
+      const colorRes = await fetch('https://purside-hire.vercel.app/api/color');
+  
+      if (!colorRes.ok) throw new Error('Failed to fetch color');
+  
+      const { color } = await colorRes.json();
+  
+      // STEP 2: Save to Supabase
       const { error: sbError } = await supabase.from('registrations').insert({
-        full_name:  form.fullName,
-        phone:      form.phone,
-        email:      form.email,
-        age_group:  form.ageGroup,
-        gender:     form.gender,
+        full_name: form.fullName,
+        phone: form.phone,
+        email: form.email,
+        age_group: form.ageGroup,
+        gender: form.gender,
         hear_about: form.hearAboutUs,
-        church:     form.church,
+        church: form.church,
+        colour: color, // NOTE: Supabase uses "colour"
       });
+  
       if (sbError) throw sbError;
+  
+      // STEP 3: Send email via Next.js API
+      await fetch('https://purside-hire.vercel.app/api/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: form.email,
+          fullName: form.fullName,
+        }),
+      });
+  
       setSuccess(true);
       setForm(initialForm);
+  
     } catch (err) {
       setError(
         err?.message?.includes('duplicate')
-          ? 'This email is already registered. See you on May 2!'
+          ? 'This email is already registered. See you on May 16!'
           : 'Oops! Something went wrong. Please try again.'
       );
       console.error(err);
@@ -1117,9 +1220,9 @@ const FooterSection = () => (
           </p>
           <div className="flex gap-4 mt-6">
             {[
-              { Icon: FaFacebookF, href: 'https://facebook.com/singlesconnect' },
-              { Icon: FaInstagram, href: 'https://instagram.com/singlesconnect' },
-              { Icon: FaTwitter,   href: 'https://twitter.com/singlesconnect' },
+              { Icon: FaFacebookF, href: 'https://www.facebook.com/menofissacharvision' },
+              { Icon: FaInstagram, href: 'https://www.facebook.com/menofissacharvision' },
+              { Icon: FaTwitter,   href: 'https://x.com/mivupdate' },
             ].map(({ Icon, href }) => (
               <a
                 key={href}
@@ -1157,13 +1260,13 @@ const FooterSection = () => (
           <ul className="flex flex-col gap-3">
             <li className="flex items-center gap-3 text-white/50 text-xs">
               <FaEnvelope className="text-brand-gold flex-shrink-0" />
-              <a href="mailto:hello@singlesconnect.ng" className="hover:text-white transition-colors">
-                @singlesconnect
+              <a href="mailto:mivmandate2010@gmail.com" className="hover:text-white transition-colors">
+                @mivmandate2010
               </a>
             </li>
             <li className="flex items-center gap-3 text-white/50 text-xs">
               <FaPhone className="text-brand-gold flex-shrink-0" />
-              <span>+234-XXX-XXXX</span>
+              <span>+234 808 085 4818</span>
             </li>
             <li className="flex items-center gap-3 text-white/50 text-xs">
               <HiOutlineLocationMarker className="text-brand-gold flex-shrink-0 text-sm" />

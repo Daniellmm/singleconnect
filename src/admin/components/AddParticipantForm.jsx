@@ -111,6 +111,21 @@ const AddParticipantForm = ({ participant, setParticipant, handleSubmit, isSubmi
 
         </div>
 
+        {/* Colour */}
+        <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">
+            Colour
+        </label>
+        <input
+            type="text"
+            name="colour"
+            value={participant.colour}
+            onChange={handleChange}
+            placeholder="e.g. Red, Blue, VIP"
+            className={field}
+        />
+        </div>
+
         <div className="mt-6 flex justify-end">
           <button
             type="submit"
