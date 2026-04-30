@@ -905,7 +905,7 @@ const RegistrationSection = () => {
   
     try {
       // STEP 1: Get color from API
-      const colorRes = await fetch('https://purside-hire.vercel.app/api/color');
+      const colorRes = await fetch('https://purside-hire.vercel.app/api/colour');
   
       if (!colorRes.ok) throw new Error('Failed to fetch color');
   
