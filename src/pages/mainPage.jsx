@@ -1050,6 +1050,7 @@ const RegistrationSection = () => {
     }
   
     setLoading(true);
+    setError('');
   
     try {
       // STEP 1: Get color from API
@@ -1068,29 +1069,35 @@ const RegistrationSection = () => {
         gender: form.gender,
         hear_about: form.hearAboutUs,
         church: form.church,
-        Colour: color, // NOTE: Supabase uses "colour"
+        Colour: color,
       });
   
       if (sbError) throw sbError;
   
       // STEP 3: Send email via Next.js API
-      await fetch('https://purside-hire.vercel.app/api/email', {
+      const emailRes = await fetch('https://purside-hire.vercel.app/api/email', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: form.email,
           fullName: form.fullName,
         }),
       });
   
+      if (!emailRes.ok) throw new Error('Failed to send email');
+  
+      // STEP 4: Success state
       setSuccess(true);
       setForm(initialForm);
   
+      // STEP 5: Redirect to WhatsApp after short delay
+      setTimeout(() => {
+        window.location.href = "https://chat.whatsapp.com/BfibGuxL1Um4gFReSnU88G?mode=gi_t";
+      }, 1500);
+  
     } catch (err) {
       setError(
-        err?.message?.includes('duplicate')
+        err?.message?.toLowerCase().includes('duplicate')
           ? 'This email is already registered. See you on May 16!'
           : 'Oops! Something went wrong. Please try again.'
       );
@@ -1126,6 +1133,7 @@ const RegistrationSection = () => {
             <p className="text-brand-muted text-sm leading-relaxed max-w-md mx-auto">
               Thank you for registering for Singles Connect 2026. We&apos;ll be in touch
               with venue details and updates. See you on May 2!
+              You’ll be redirected to our WhatsApp group shortly.
             </p>
           </div>
         ) : (
