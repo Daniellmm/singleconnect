@@ -19,7 +19,6 @@ import Gal25  from '../assets/2025.jpg';
 import {
   FaFacebookF, FaYoutube, FaEnvelope, FaPhone,
 } from 'react-icons/fa';
-import { HiArrowRight } from "react-icons/hi";
 import { SiTiktok, SiX } from 'react-icons/si';
 import {
   HiOutlineLightBulb, HiOutlineChatAlt2, HiOutlineUserGroup,
@@ -723,118 +722,150 @@ const albums = [
     year: '2021',
     label: "Singles' Connect 2021",
     desc: 'The beginning of a movement that grew into something powerful.',
-    image: Gal21,
-    folderId: "FOLDER_ID_2021",
+    folderId: '1rhNm8dC6a3oIfl1xpkwbgrVal-yTl-9g',
+    gradient: 'from-brand-purple/30 to-brand-purple/5',
+  },
+  {
+    year: '2022',
+    label: "Singles' Connect 2022",
+    desc: 'Growing stronger and more impactful.',
+    folderId: '1LOd1eO6w_NrTFndAsBMhff3ZfZjeTcuZ',
+    gradient: 'from-brand-gold/30 to-brand-gold/5',
   },
   {
     year: '2023',
     label: "Singles' Connect 2023",
-    desc: 'The edition that set the standard. Great moments, great people.',
-    image: Gal23,
-    folderId: "FOLDER_ID_2023",
+    desc: 'The edition that set the standard.',
+    folderId: '1FZoIMzZ7sCyBQppL1oJGJU8_aTha7YPC',
+    gradient: 'from-brand-rose/30 to-brand-rose/5',
   },
   {
     year: '2024',
     label: "Singles Connect '24",
     desc: 'Bigger, bolder, and more impactful than ever.',
-    image: Gal24,
-    folderId: "FOLDER_ID_2024",
+    folderId: '1zvf4TLYDf3GQ4Lr6RKTbcqPkWrw7YlU6',
+    gradient: 'from-brand-purple/30 to-brand-purple/5',
   },
   {
     year: '2025',
     label: 'SC 2025',
     desc: 'The most recent chapter — watch the highlights.',
-    image: Gal25,
-    folderId: "1rhNm8dC6a3oIfl1xpkwbgrVal-yTl-9g",
+    folderId: '13YCHnILD9xAlAnP15O1pgRczYZI4poAF',
+    gradient: 'from-brand-gold/30 to-brand-gold/5',
   },
 ];
 
-
 const GallerySection = () => {
-  const [selectedAlbum, setSelectedAlbum] = useState(null);
+  const [openAlbum, setOpenAlbum] = useState(null);
   const [images, setImages] = useState([]);
-  const [index, setIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Fetch images when album opens
-  const openAlbum = async (album) => {
-    setSelectedAlbum(album);
+  // swipe
+  const [touchStart, setTouchStart] = useState(null);
+
+  const openModal = async (album) => {
+    setOpenAlbum(album);
     setLoading(true);
-    setImages([]);
-    setIndex(0);
+    setCurrentIndex(0);
 
-    const res = await fetch(`/api/images?folderId=${album.folderId}`);
-    const data = await res.json();
-
-    setImages(data);
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/gallery?folderId=${album.folderId}`);
+      const data = await res.json();
+      setImages(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const closeModal = () => setSelectedAlbum(null);
+  const closeModal = () => {
+    setOpenAlbum(null);
+    setImages([]);
+  };
 
   const next = () => {
-    setIndex((i) => Math.min(i + 1, images.length - 1));
+    setCurrentIndex((prev) => {
+      const nextIndex = (prev + 1) % images.length;
+      preload(nextIndex);
+      return nextIndex;
+    });
   };
 
   const prev = () => {
-    setIndex((i) => Math.max(i - 1, 0));
+    setCurrentIndex((prev) => {
+      const nextIndex = (prev - 1 + images.length) % images.length;
+      preload(nextIndex);
+      return nextIndex;
+    });
   };
 
-  // Keyboard navigation
+  const preload = (index) => {
+    if (!images[index]) return;
+    const img = new Image();
+    img.src = images[index].url;
+  };
+
+  // preload next automatically
+  useEffect(() => {
+    if (images.length > 1) {
+      preload((currentIndex + 1) % images.length);
+    }
+  }, [currentIndex, images]);
+
+  // keyboard nav
   useEffect(() => {
     const handler = (e) => {
-      if (!selectedAlbum) return;
-
-      if (e.key === "Escape") closeModal();
-      if (e.key === "ArrowRight") next();
-      if (e.key === "ArrowLeft") prev();
+      if (!openAlbum) return;
+      if (e.key === 'ArrowRight') next();
+      if (e.key === 'ArrowLeft') prev();
+      if (e.key === 'Escape') closeModal();
     };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [openAlbum, images]);
 
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [selectedAlbum, images]);
+  // swipe handlers
+  const handleTouchStart = (e) => {
+    setTouchStart(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!touchStart) return;
+    const diff = touchStart - e.changedTouches[0].clientX;
+
+    if (diff > 50) next();
+    if (diff < -50) prev();
+
+    setTouchStart(null);
+  };
 
   return (
     <section id="gallery" className="bg-brand-darker py-28 px-6 lg:px-10 overflow-hidden">
       <div className="max-w-7xl mx-auto">
 
-        {/* Header */}
         <div className="text-center mb-16 reveal">
           <SectionLabel>Gallery</SectionLabel>
           <SectionHeading>
             Photo <span className="text-brand-rose">Memories</span>
           </SectionHeading>
           <p className="text-brand-muted mt-4 max-w-xl mx-auto text-sm">
-            Moments captured from past editions of Singles Connect.
+            Moments captured from past editions.
           </p>
         </div>
 
-        {/* Albums */}
+        {/* ALBUM GRID */}
         <div className="grid md:grid-cols-3 gap-7">
           {albums.map((album, i) => (
-            <div
+            <button
               key={album.year}
-              onClick={() => openAlbum(album)}
-              className="reveal glass-card rounded-2xl overflow-hidden group hover:-translate-y-2 transition-all duration-300 cursor-pointer"
+              onClick={() => openModal(album)}
+              className="reveal glass-card rounded-2xl overflow-hidden group hover:-translate-y-2 transition-all duration-300 text-left"
               style={{ transitionDelay: `${i * 100}ms` }}
             >
-              <div className="h-52 relative overflow-hidden rounded-t-2xl">
-                <img
-                  src={album.image}
-                  alt={album.label}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-brand-dark/40">
-                  <span className="text-white text-sm font-semibold tracking-widest uppercase flex items-center gap-2">
-                    View Photos <HiArrowRight />
-                  </span>
-                </div>
-              </div>
-
               <div className="p-6">
-                <p className="text-brand-gold text-xs font-semibold uppercase tracking-widest mb-1">
+                <p className="text-brand-gold text-xs font-semibold uppercase mb-1">
                   {album.year} Edition
                 </p>
                 <h3 className="text-white font-bold text-base mb-1">
@@ -842,69 +873,74 @@ const GallerySection = () => {
                 </h3>
                 <p className="text-white/50 text-xs">{album.desc}</p>
               </div>
-            </div>
+            </button>
           ))}
         </div>
-
-        {/* MODAL */}
-        {selectedAlbum && (
-          <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
-
-            {/* Close */}
-            <button
-              onClick={closeModal}
-              className="absolute top-5 right-5 text-white text-3xl"
-            >
-              ✕
-            </button>
-
-            {/* Left */}
-            <button
-              onClick={prev}
-              className="absolute left-5 text-white text-4xl"
-            >
-              ←
-            </button>
-
-            {/* Content */}
-            <div className="flex flex-col items-center justify-center">
-
-              {loading && (
-                <p className="text-white">Loading...</p>
-              )}
-
-              {!loading && images.length > 0 && (
-                <img
-                  src={images[index]?.url}
-                  alt=""
-                  className="max-h-[80vh] max-w-[90vw] object-contain rounded-lg"
-                  loading="lazy"
-                />
-              )}
-
-              {/* Counter */}
-              {!loading && images.length > 0 && (
-                <p className="text-white/60 mt-3 text-sm">
-                  {index + 1} / {images.length}
-                </p>
-              )}
-            </div>
-
-            {/* Right */}
-            <button
-              onClick={next}
-              className="absolute right-5 text-white text-4xl"
-            >
-              →
-            </button>
-          </div>
-        )}
-
       </div>
+
+      {/* MODAL */}
+      {openAlbum && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex flex-col">
+
+          {/* HEADER */}
+          <div className="flex justify-between items-center p-4">
+            <h3 className="text-white font-bold">
+              {openAlbum.label}
+            </h3>
+            <button onClick={closeModal} className="text-white text-xl">✕</button>
+          </div>
+
+          {/* CONTENT */}
+          {loading ? (
+            <div className="text-center text-white mt-20">Loading...</div>
+          ) : (
+            <>
+              {/* IMAGE VIEWER */}
+              {images[currentIndex] && (
+                <div
+                  className="flex-1 flex items-center justify-center px-4"
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  <img
+                    src={images[currentIndex].url}
+                    alt=""
+                    className="max-h-[70vh] w-auto object-contain rounded-lg"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
+              {/* NAV */}
+              <div className="flex justify-between items-center px-6 py-4">
+                <button onClick={prev} className="text-white text-2xl">←</button>
+                <p className="text-white text-sm">
+                  {currentIndex + 1} / {images.length}
+                </p>
+                <button onClick={next} className="text-white text-2xl">→</button>
+              </div>
+
+              {/* GRID PREVIEW */}
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 overflow-y-auto max-h-[40vh]">
+                {images.map((img, i) => (
+                  <img
+                    key={img.id}
+                    src={img.url}
+                    loading="lazy"
+                    onClick={() => setCurrentIndex(i)}
+                    className={`cursor-pointer rounded-lg object-cover h-40 w-full ${
+                      i === currentIndex ? 'ring-2 ring-brand-gold' : ''
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </section>
   );
 };
-
 
 /* ═══════════
    9. SPONSORS / PARTNERS
@@ -990,8 +1026,6 @@ const RegistrationSection = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError]     = useState('');
-  const WHATSAPP_GROUP_LINK = "https://chat.whatsapp.com/BfibGuxL1Um4gFReSnU88G?mode=gi_t";
-
 
   const handleChange = (e) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -1000,24 +1034,24 @@ const RegistrationSection = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const { fullName, phone, email, ageGroup, gender } = form;
-
+  
     if (!fullName || !phone || !email || !ageGroup || !gender) {
       setError('Please fill in all required fields.');
       return;
     }
-
+  
     setLoading(true);
-
+  
     try {
       // STEP 1: Get color from API
       const colorRes = await fetch('https://purside-hire.vercel.app/api/colour');
-
+  
       if (!colorRes.ok) throw new Error('Failed to fetch color');
-
+  
       const { color } = await colorRes.json();
-
+  
       // STEP 2: Save to Supabase
       const { error: sbError } = await supabase.from('registrations').insert({
         full_name: form.fullName,
@@ -1027,30 +1061,26 @@ const RegistrationSection = () => {
         gender: form.gender,
         hear_about: form.hearAboutUs,
         church: form.church,
-        Colour: color,
+        Colour: color, // NOTE: Supabase uses "colour"
       });
-
+  
       if (sbError) throw sbError;
-
-      // STEP 3: Send email
+  
+      // STEP 3: Send email via Next.js API
       await fetch('https://purside-hire.vercel.app/api/email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           email: form.email,
           fullName: form.fullName,
         }),
       });
-
-      // STEP 4: Show success
+  
       setSuccess(true);
       setForm(initialForm);
-
-      // STEP 5: Redirect to WhatsApp after 3 seconds
-      setTimeout(() => {
-        window.location.href = WHATSAPP_GROUP_LINK;
-      }, 3000);
-
+  
     } catch (err) {
       setError(
         err?.message?.includes('duplicate')
@@ -1083,27 +1113,13 @@ const RegistrationSection = () => {
         </div>
 
         {success ? (
-          <div className="reveal glass-card rounded-2xl p-5 text-center">
+          <div className="reveal glass-card rounded-2xl p-5  text-center">
             <HiCheckCircle className="text-brand-gold text-6xl mx-auto mb-4" />
-            
-            <h3 className="text-white font-bold text-2xl mb-2">
-              You’re registered!
-            </h3>
-
+            <h3 className="text-white font-bold text-2xl mb-2">You&apos;re registered!</h3>
             <p className="text-brand-muted text-sm leading-relaxed max-w-md mx-auto">
-              Thank you for registering for Singles Connect 2026.
-              <br /><br />
-              You’ll be redirected to our WhatsApp group shortly...
+              Thank you for registering for Singles Connect 2026. We&apos;ll be in touch
+              with venue details and updates. See you on May 2!
             </p>
-
-            <a
-              href={WHATSAPP_GROUP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block mt-5 btn-rose px-6 py-3"
-            >
-              Join WhatsApp Group Now
-            </a>
           </div>
         ) : (
           <form
