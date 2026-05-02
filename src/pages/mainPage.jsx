@@ -770,7 +770,7 @@ const GallerySection = () => {
     setCurrentIndex(0);
 
     try {
-      const res = await fetch(`/api/gallery?folderId=${album.folderId}`);
+      const res = await fetch(`https://purside-hire.vercel.app/api/gallery?folderId=${album.folderId}`);
       const data = await res.json();
       setImages(data);
     } catch (e) {
