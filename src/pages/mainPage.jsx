@@ -859,21 +859,34 @@ const GallerySection = () => {
         <div className="grid md:grid-cols-3 gap-7">
           {albums.map((album, i) => (
             <button
-              key={album.year}
-              onClick={() => openModal(album)}
-              className="reveal glass-card rounded-2xl overflow-hidden group hover:-translate-y-2 transition-all duration-300 text-left"
-              style={{ transitionDelay: `${i * 100}ms` }}
-            >
-              <div className="p-6">
-                <p className="text-brand-gold text-xs font-semibold uppercase mb-1">
-                  {album.year} Edition
-                </p>
-                <h3 className="text-white font-bold text-base mb-1">
-                  {album.label}
-                </h3>
-                <p className="text-white/50 text-xs">{album.desc}</p>
+            key={album.year}
+            onClick={() => openModal(album)}
+            className="reveal glass-card rounded-2xl overflow-hidden group hover:-translate-y-2 transition-all duration-300 text-left relative"
+            style={{ transitionDelay: `${i * 100}ms` }}
+          >
+            {/* Overlay hint */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300">
+              <span className="text-white text-xs sm:text-sm font-semibold tracking-widest uppercase flex items-center gap-2">
+                View Gallery <HiArrowRight />
+              </span>
+            </div>
+          
+            {/* Content */}
+            <div className="p-6 relative z-10">
+              <p className="text-brand-gold text-xs font-semibold uppercase mb-1">
+                {album.year} Edition
+              </p>
+              <h3 className="text-white font-bold text-base mb-1">
+                {album.label}
+              </h3>
+              <p className="text-white/50 text-xs">{album.desc}</p>
+          
+              {/* Mobile hint (always visible) */}
+              <div className="mt-3 sm:hidden text-xs text-brand-muted flex items-center gap-1">
+                Tap to view <HiArrowRight />
               </div>
-            </button>
+            </div>
+          </button>
           ))}
         </div>
       </div>
