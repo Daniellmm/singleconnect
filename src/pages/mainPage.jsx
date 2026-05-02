@@ -398,11 +398,11 @@ const SpeakerCard = ({ speaker, index }) => {
       style={{ transitionDelay: `${index * 80}ms` }}
     >
       {/* Image */}
-      <div className="relative h-48 overflow-hidden flex items-center justify-center bg-black/20">
+      <div className="relative h-80 md:h-[28rem] overflow-hidden">
         <img
           src={speaker.photo}
           alt={displayName}
-          className="max-h-full max-w-full object-contain scale-110 group-hover:scale-125 transition duration-500"
+          className="w-full h-full object-contain group-hover:scale-105 transition duration-500"
         />
         <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-brand-card to-transparent" />
       </div>
