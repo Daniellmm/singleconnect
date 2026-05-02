@@ -861,18 +861,10 @@ const GallerySection = () => {
             <button
             key={album.year}
             onClick={() => openModal(album)}
-            className="reveal glass-card rounded-2xl overflow-hidden group hover:-translate-y-2 transition-all duration-300 text-left relative"
+            className="reveal glass-card rounded-2xl overflow-hidden group hover:-translate-y-2 transition-all duration-300 text-left flex flex-col justify-between"
             style={{ transitionDelay: `${i * 100}ms` }}
           >
-            {/* Overlay hint */}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300">
-              <span className="text-white text-xs sm:text-sm font-semibold tracking-widest uppercase flex items-center gap-2">
-                View Gallery <HiArrowRight />
-              </span>
-            </div>
-          
-            {/* Content */}
-            <div className="p-6 relative z-10">
+            <div className="p-6">
               <p className="text-brand-gold text-xs font-semibold uppercase mb-1">
                 {album.year} Edition
               </p>
@@ -880,10 +872,12 @@ const GallerySection = () => {
                 {album.label}
               </h3>
               <p className="text-white/50 text-xs">{album.desc}</p>
+            </div>
           
-              {/* Mobile hint (always visible) */}
-              <div className="mt-3 sm:hidden text-xs text-brand-muted flex items-center gap-1">
-                Tap to view <HiArrowRight />
+            {/* CTA */}
+            <div className="px-6 pb-5">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-brand-gold border border-brand-gold/40 rounded-full px-3 py-1.5 transition-all duration-300 group-hover:bg-brand-gold group-hover:text-black">
+                Tap to view
               </div>
             </div>
           </button>
