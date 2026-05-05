@@ -392,7 +392,7 @@ const SpeakerCard = ({ speaker, index }) => {
       style={{ transitionDelay: `${index * 80}ms` }}
     >
       {/* Image */}
-      <div className="relative h-85 md:h-[28rem] overflow-hidden">
+      <div className="relative h-80 md:h-[28rem] overflow-hidden">
         <img
           src={speaker.photo}
           alt={displayName}
