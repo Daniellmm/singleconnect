@@ -13,7 +13,6 @@ import Ire from '../assets/ire.png';
 import Orobs from '../assets/orob.png';
 import Peapen from '../assets/peap.png';
 import Solid from '../assets/solid.png';
-import Metro from '../assets/metro.png';
 
 
 import {
