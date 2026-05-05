@@ -8,7 +8,6 @@ import AboutImg  from '../assets/aboutImg.jpg';
 
 import RevSam   from '../assets/samson.jpg';
 import RevSte  from '../assets/stella.jpg';
-
 import Access from '../assets/access.png';
 import Ire from '../assets/ire.png';
 import Orobs from '../assets/orob.png';
@@ -151,13 +150,13 @@ const AboutSection = () => (
             className="w-full h-[480px] object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/60 to-transparent" />
-
+          {/* Floating stat card */}
           <div className="absolute bottom-6 left-6 glass-card rounded-xl p-4 bg-brand-dark/80">
             <p className="text-brand-gold text-3xl font-black">6+</p>
             <p className="text-white text-xs uppercase tracking-widest">Years of Impact</p>
           </div>
         </div>
-
+        {/* Decorative shape */}
         <div className="absolute -bottom-8 -left-8 w-40 h-40 border-2 border-brand-gold/20 rounded-2xl -z-10" />
         <div className="absolute -top-8 -right-8 w-24 h-24 bg-brand-rose/10 rounded-full blur-2xl -z-10" />
       </div>
@@ -165,11 +164,11 @@ const AboutSection = () => (
       {/* Text side */}
       <div className="reveal-right">
         <SectionLabel>About Singles Connect</SectionLabel>
-
         <SectionHeading light={false}>
           A Space Built <br />
           <span className="text-brand-rose">for You</span>
         </SectionHeading>
+
 
         <div className="gold-line my-6" />
 
@@ -178,7 +177,7 @@ const AboutSection = () => (
         </p>
 
         <p className="text-brand-dark/70 text-sm leading-relaxed mb-5">
-          What began <span className="font-mono bg-brand-dark/5 px-1 rounded">almost</span> a decade ago as a simple vision with just three people has grown into a thriving annual movement that now attracts hundreds of attendees and continues to impact lives year after year.
+          What began like a decade ago as a simple vision with just three people has grown into a thriving annual movement that now attracts hundreds of attendees and continues to impact lives year after year.
         </p>
 
         <p className="text-brand-dark/70 text-sm leading-relaxed mb-6">
@@ -186,11 +185,11 @@ const AboutSection = () => (
         </p>
 
         <p className="text-brand-dark/70 text-sm leading-relaxed mb-5">
-          In 2020, Singles Connect adapted to the global COVID-19 pandemic by hosting a virtual edition through an online panel session. In 2021, the experience evolved further into a more intimate and curated dinner gathering at My Father’s House, emphasizing intentional conversations and deeper engagement. From 2022 to the present, Singles Connect has become a highly anticipated annual event, consistently drawing hundreds of participants and delivering memorable, life-impacting experiences.
+          In 2020, Singles Connect adapted to the global COVID-19 pandemic by hosting a virtual edition through an online panel session, maintaining its commitment to connection and growth despite physical limitations. In 2021, the experience evolved further into a more intimate and curated dinner gathering at My Father’s House, emphasizing intentional conversations and deeper engagement. From 2022 to the present, Singles Connect has become a highly anticipated annual event, consistently drawing hundreds of participants and delivering memorable, life-impacting experiences.
         </p>
 
         <p className="text-brand-dark/70 text-sm leading-relaxed mb-6">
-          Over the years, the platform has hosted respected voices such as Apostle Femi Lazarus, Pastor Victor Olukoju (PVO), and Pastor Anwinli Ojeikere (The Winlos), whose practical and relatable teachings have contributed significantly to the event’s influence and impact.
+          Over the years, the platform has hosted respected voices such as: Apostle Femi Lazarus, Pastor Victor Olukoju (PVO) and Pastor Anwinli Ojeikere (The Winlos), whose practical and relatable teachings have contributed significantly to the event’s influence and impact.
         </p>
 
         <p className="text-brand-dark/70 text-sm leading-relaxed mb-5">
@@ -966,8 +965,9 @@ const partners = [
   { name: 'Orobs Photography', category: 'Media', logo: Orobs },
   { name: 'PEAPEN Travels Nigeria', category: 'Travel and Study Agency', logo: Peapen },
   { name: 'Metro Meet', category: 'NGO', logo: Metro },
-  { name: 'Solid Imaginations Contractors Ltd', category: 'Construction', logo: Solid },
+  { name: 'Solid Imaginations Contractors Ltd', category: 'Engineering', logo: Solid },
 ];
+
 const SponsorsSection = () => (
   <section id="sponsors" className="bg-brand-light py-28 px-6 lg:px-10 overflow-hidden">
     <div className="max-w-6xl mx-auto">
