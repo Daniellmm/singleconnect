@@ -9,6 +9,13 @@ import AboutImg  from '../assets/aboutImg.jpg';
 import RevSam   from '../assets/samson.jpg';
 import RevSte  from '../assets/stella.jpg';
 
+import Access from '../assets/access.png';
+import Ire from '../assets/ire.png';
+import Orobs from '../assets/orob.png';
+import Peapen from '../assets/peap.png';
+import Solid from '../assets/solid.png';
+import Metro from '../assets/metro.png';
+
 
 import {
   FaFacebookF, FaYoutube, FaEnvelope, FaPhone,
@@ -144,13 +151,13 @@ const AboutSection = () => (
             className="w-full h-[480px] object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/60 to-transparent" />
-          {/* Floating stat card */}
+
           <div className="absolute bottom-6 left-6 glass-card rounded-xl p-4 bg-brand-dark/80">
             <p className="text-brand-gold text-3xl font-black">6+</p>
             <p className="text-white text-xs uppercase tracking-widest">Years of Impact</p>
           </div>
         </div>
-        {/* Decorative shape */}
+
         <div className="absolute -bottom-8 -left-8 w-40 h-40 border-2 border-brand-gold/20 rounded-2xl -z-10" />
         <div className="absolute -top-8 -right-8 w-24 h-24 bg-brand-rose/10 rounded-full blur-2xl -z-10" />
       </div>
@@ -158,11 +165,11 @@ const AboutSection = () => (
       {/* Text side */}
       <div className="reveal-right">
         <SectionLabel>About Singles Connect</SectionLabel>
+
         <SectionHeading light={false}>
           A Space Built <br />
           <span className="text-brand-rose">for You</span>
         </SectionHeading>
-
 
         <div className="gold-line my-6" />
 
@@ -171,7 +178,7 @@ const AboutSection = () => (
         </p>
 
         <p className="text-brand-dark/70 text-sm leading-relaxed mb-5">
-          What began like a decade ago as a simple vision with just three people has grown into a thriving annual movement that now attracts hundreds of attendees and continues to impact lives year after year.
+          What began <span className="font-mono bg-brand-dark/5 px-1 rounded">almost</span> a decade ago as a simple vision with just three people has grown into a thriving annual movement that now attracts hundreds of attendees and continues to impact lives year after year.
         </p>
 
         <p className="text-brand-dark/70 text-sm leading-relaxed mb-6">
@@ -179,11 +186,11 @@ const AboutSection = () => (
         </p>
 
         <p className="text-brand-dark/70 text-sm leading-relaxed mb-5">
-          In 2020, Singles Connect adapted to the global COVID-19 pandemic by hosting a virtual edition through an online panel session, maintaining its commitment to connection and growth despite physical limitations. In 2021, the experience evolved further into a more intimate and curated dinner gathering at My Father’s House, emphasizing intentional conversations and deeper engagement. From 2022 to the present, Singles Connect has become a highly anticipated annual event, consistently drawing hundreds of participants and delivering memorable, life-impacting experiences.
+          In 2020, Singles Connect adapted to the global COVID-19 pandemic by hosting a virtual edition through an online panel session. In 2021, the experience evolved further into a more intimate and curated dinner gathering at My Father’s House, emphasizing intentional conversations and deeper engagement. From 2022 to the present, Singles Connect has become a highly anticipated annual event, consistently drawing hundreds of participants and delivering memorable, life-impacting experiences.
         </p>
 
         <p className="text-brand-dark/70 text-sm leading-relaxed mb-6">
-          Over the years, the platform has hosted respected voices such as: Apostle Femi Lazarus, Pastor Victor Olukoju (PVO) and Pastor Anwinli Ojeikere (The Winlos), whose practical and relatable teachings have contributed significantly to the event’s influence and impact.
+          Over the years, the platform has hosted respected voices such as Apostle Femi Lazarus, Pastor Victor Olukoju (PVO), and Pastor Anwinli Ojeikere (The Winlos), whose practical and relatable teachings have contributed significantly to the event’s influence and impact.
         </p>
 
         <p className="text-brand-dark/70 text-sm leading-relaxed mb-5">
@@ -954,17 +961,18 @@ const GallerySection = () => {
    9. SPONSORS / PARTNERS
 ═══════════ */
 const partners = [
-  { name: 'Access Bank',                 category: 'Banking & Finance' },
-  { name: 'Ire Ayo Crown',               category: 'Food Enterprise' },
-  { name: 'Swift Architecture',          category: 'Architect & Engineering Firm' },
-  { name: 'Orobs Photography',           category: 'Media' },
-  { name: 'PEAPEN Travels Nigeria',      category: 'Travel and Study Agency' },
-  { name: 'Metro Meet',                  category: 'NGO' },
+  { name: 'Access Bank', category: 'Banking & Finance', logo: Access },
+  { name: 'Ire Ayo Crown', category: 'Food Enterprise', logo: Ire },
+  { name: 'Orobs Photography', category: 'Media', logo: Orobs },
+  { name: 'PEAPEN Travels Nigeria', category: 'Travel and Study Agency', logo: Peapen },
+  { name: 'Metro Meet', category: 'NGO', logo: Metro },
+  { name: 'Solid Imaginations Contractors Ltd', category: 'Construction', logo: Solid },
 ];
-
 const SponsorsSection = () => (
   <section id="sponsors" className="bg-brand-light py-28 px-6 lg:px-10 overflow-hidden">
     <div className="max-w-6xl mx-auto">
+
+      {/* Header */}
       <div className="text-center mb-16 reveal">
         <SectionLabel>Exhibition & Partners</SectionLabel>
 
@@ -979,7 +987,6 @@ const SponsorsSection = () => (
           designed for where you&apos;re going.
         </p>
 
-        {/* Contact */}
         <p className="mt-5 text-brand-dark text-sm font-medium">
           For partnership enquiries:
           <span className="block mt-1 text-brand-rose font-semibold">
@@ -988,22 +995,46 @@ const SponsorsSection = () => (
         </p>
       </div>
 
+      {/* Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-        {partners.map(({ name, category }, i) => (
+        {partners.map(({ name, category, logo }, i) => (
           <div
             key={name}
             className="reveal border border-brand-dark/10 rounded-2xl p-6 text-center hover:border-brand-rose/30 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-white"
             style={{ transitionDelay: `${i * 70}ms` }}
           >
-            <div className="w-12 h-12 rounded-full bg-brand-purple/10 flex items-center justify-center mx-auto mb-3">
-              <span className="text-brand-purple-light font-black text-lg">{name[0]}</span>
+
+            {/* Logo or fallback */}
+            <div className="w-14 h-14 flex items-center justify-center mx-auto mb-4">
+              {logo ? (
+                <img
+                  src={logo}
+                  alt={name}
+                  className="max-h-full max-w-full object-contain"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-brand-purple/10 flex items-center justify-center">
+                  <span className="text-brand-purple-light font-black text-lg">
+                    {name[0]}
+                  </span>
+                </div>
+              )}
             </div>
-            <p className="text-brand-dark font-bold text-sm mb-1">{name}</p>
-            <p className="text-brand-dark/50 text-xs">{category}</p>
+
+            {/* Name */}
+            <p className="text-brand-dark font-bold text-sm mb-1">
+              {name}
+            </p>
+
+            {/* Category */}
+            <p className="text-brand-dark/50 text-xs">
+              {category}
+            </p>
           </div>
         ))}
       </div>
 
+      {/* CTA */}
       <div className="text-center mt-12 reveal">
         <a
           href="tel:08160310828"
@@ -1012,7 +1043,8 @@ const SponsorsSection = () => (
           Partner Now
         </a>
       </div>
-      </div>
+
+    </div>
   </section>
 );
 
