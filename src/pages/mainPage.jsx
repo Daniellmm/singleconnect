@@ -962,10 +962,9 @@ const GallerySection = () => {
 const partners = [
   { name: 'Access Bank', category: 'Banking & Finance', logo: Access },
   { name: 'Ire Ayo Crown', category: 'Food Enterprise', logo: Ire },
-  { name: 'Swift Architecture', category: 'Architect & Engineering Firm' }, // no image yet
   { name: 'Orobs Photography', category: 'Media', logo: Orobs },
   { name: 'PEAPEN Travels Nigeria', category: 'Travel and Study Agency', logo: Peapen },
-  { name: 'Metro Meet', category: 'NGO', logo: Metro },
+  { name: 'Metro Meet', category: 'NGO' },
   { name: 'Solid Imaginations Contractors Ltd', category: 'Construction', logo: Solid },
 ];
 
