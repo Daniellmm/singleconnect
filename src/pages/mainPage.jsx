@@ -629,7 +629,6 @@ const testimonials = [
     accent: 'border-brand-rose',
     quoteColor: 'text-brand-rose/30',
   },
-  const testimonials = [
   {
     quote: `We met at Singles Connect, during one of the group session where we were paired together with other participants. What began as a simple, unplanned conversation soon stood out to both of us. After that session, we exchanged contacts, and from that day onward, we kept talking. One conversation led to another, and gradually, what started casually grew into something deeper and more intentional. 
 
