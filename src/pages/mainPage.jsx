@@ -960,17 +960,20 @@ const GallerySection = () => {
    9. SPONSORS / PARTNERS
 ═══════════ */
 const partners = [
-  { name: 'Access Bank',                 category: 'Banking & Finance' },
-  { name: 'Ire Ayo Crown',               category: 'Food Enterprise' },
-  { name: 'Swift Architecture',          category: 'Architect & Engineering Firm' },
-  { name: 'Orobs Photography',           category: 'Media' },
-  { name: 'PEAPEN Travels Nigeria',      category: 'Travel and Study Agency' },
-  { name: 'Metro Meet',                  category: 'NGO' },
+  { name: 'Access Bank', category: 'Banking & Finance', logo: Access },
+  { name: 'Ire Ayo Crown', category: 'Food Enterprise', logo: Ire },
+  { name: 'Swift Architecture', category: 'Architect & Engineering Firm' }, // no image yet
+  { name: 'Orobs Photography', category: 'Media', logo: Orobs },
+  { name: 'PEAPEN Travels Nigeria', category: 'Travel and Study Agency', logo: Peapen },
+  { name: 'Metro Meet', category: 'NGO', logo: Metro },
+  { name: 'Solid Imaginations Contractors Ltd', category: 'Construction', logo: Solid },
 ];
 
 const SponsorsSection = () => (
   <section id="sponsors" className="bg-brand-light py-28 px-6 lg:px-10 overflow-hidden">
     <div className="max-w-6xl mx-auto">
+
+      {/* Header */}
       <div className="text-center mb-16 reveal">
         <SectionLabel>Exhibition & Partners</SectionLabel>
 
@@ -985,7 +988,6 @@ const SponsorsSection = () => (
           designed for where you&apos;re going.
         </p>
 
-        {/* Contact */}
         <p className="mt-5 text-brand-dark text-sm font-medium">
           For partnership enquiries:
           <span className="block mt-1 text-brand-rose font-semibold">
@@ -994,22 +996,46 @@ const SponsorsSection = () => (
         </p>
       </div>
 
+      {/* Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-        {partners.map(({ name, category }, i) => (
+        {partners.map(({ name, category, logo }, i) => (
           <div
             key={name}
             className="reveal border border-brand-dark/10 rounded-2xl p-6 text-center hover:border-brand-rose/30 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-white"
             style={{ transitionDelay: `${i * 70}ms` }}
           >
-            <div className="w-12 h-12 rounded-full bg-brand-purple/10 flex items-center justify-center mx-auto mb-3">
-              <span className="text-brand-purple-light font-black text-lg">{name[0]}</span>
+
+            {/* Logo or fallback */}
+            <div className="w-14 h-14 flex items-center justify-center mx-auto mb-4">
+              {logo ? (
+                <img
+                  src={logo}
+                  alt={name}
+                  className="max-h-full max-w-full object-contain"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-brand-purple/10 flex items-center justify-center">
+                  <span className="text-brand-purple-light font-black text-lg">
+                    {name[0]}
+                  </span>
+                </div>
+              )}
             </div>
-            <p className="text-brand-dark font-bold text-sm mb-1">{name}</p>
-            <p className="text-brand-dark/50 text-xs">{category}</p>
+
+            {/* Name */}
+            <p className="text-brand-dark font-bold text-sm mb-1">
+              {name}
+            </p>
+
+            {/* Category */}
+            <p className="text-brand-dark/50 text-xs">
+              {category}
+            </p>
           </div>
         ))}
       </div>
 
+      {/* CTA */}
       <div className="text-center mt-12 reveal">
         <a
           href="tel:08160310828"
@@ -1018,7 +1044,8 @@ const SponsorsSection = () => (
           Partner Now
         </a>
       </div>
-      </div>
+
+    </div>
   </section>
 );
 
