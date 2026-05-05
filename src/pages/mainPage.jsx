@@ -173,33 +173,28 @@ const AboutSection = () => (
         <div className="gold-line my-6" />
 
         <p className="text-brand-dark/70 text-base leading-relaxed mb-5">
-          Singles Connect is an annual gathering designed to bring young adults together
-          to bond, dine, network, and build wholesome relationships. Every year, we create
-          a space where you can connect with like-minded people, receive life-changing
-          teaching, play games, enjoy great food, and build friendships all within a
-          safe, sane environment.
+          Singles Connect is an annual gathering designed to bring young adults together to connect, grow, and build wholesome relationships in a safe, value-driven environment. 
         </p>
 
-        <blockquote className="border-l-4 border-brand-gold pl-5 py-3 bg-brand-gold/5 rounded-r-lg mb-6">
-          <p className="text-brand-dark/80 italic text-sm leading-relaxed">
-            Singles Connect began six years ago as a vision to unite Christian singles
-            in purposeful fellowship. What started with just three people has grown into
-            a thriving annual gathering filled with meaningful connections and shared experiences.
-          </p>
-        </blockquote>
 
         <p className="text-brand-dark/70 text-sm leading-relaxed mb-5">
-          Over the years, the event has featured memorable moments including dinner nights,
-          outings to IITA and the UI Botanical Garden, and engaging activities that foster
-          genuine relationships. Each edition now welcomes hundreds of attendees, with lives
-          consistently impacted and anticipation growing year after year.
+          What began like a decade ago as a simple vision with just three people has grown into a thriving annual movement that now attracts hundreds of attendees and continues to impact lives year after year.
         </p>
 
         <p className="text-brand-dark/70 text-sm leading-relaxed mb-6">
-          Singles Connect has also hosted seasoned relationship coaches and sexual purity
-          advocates, including Pastor Victor Olukoju (PVO), author of “Letter from my Father”
-          and convener of “SONDA Day”, as well as Pastor Anwinli Ojeikere (The Winlos),
-          co-host of “MRC Experience” and co-author of the best-selling book “His Ex, Her Ex”.
+          The journey started in 2017 at Agodi Gardens in Ibadan, where over 140 singles gathered for a picnic-style event focused on relationships, purpose, and honest conversations. In 2018, the experience expanded to IITA, creating a more immersive outdoor environment for deeper connection. By 2019 at NPG Gardens, Akobo, the event had grown in structure, attendance, and overall impact, strengthening its sense of community.
+        </p>
+
+        <p className="text-brand-dark/70 text-sm leading-relaxed mb-5">
+          In 2020, Singles Connect adapted to the global COVID-19 pandemic by hosting a virtual edition through an online panel session, maintaining its commitment to connection and growth despite physical limitations. In 2021, the experience evolved further into a more intimate and curated dinner gathering at My Father’s House, emphasizing intentional conversations and deeper engagement. From 2022 to the present, Singles Connect has become a highly anticipated annual event, consistently drawing hundreds of participants and delivering memorable, life-impacting experiences.
+        </p>
+
+        <p className="text-brand-dark/70 text-sm leading-relaxed mb-6">
+          Over the years, the platform has hosted respected voices such as: Apostle Femi Lazarus, Pastor Victor Olukoju (PVO) and Pastor Anwinli Ojeikere (The Winlos), whose practical and relatable teachings have contributed significantly to the event’s influence and impact.
+        </p>
+
+        <p className="text-brand-dark/70 text-sm leading-relaxed mb-6">
+          Singles Connect continues to stand out as a space where genuine relationships are built, lives are transformed, and a strong community is formed. As the movement keeps growing, you are invited to be part of the 2026 edition and experience connection, growth, and networking like never before.
         </p>
 
         <p className="text-brand-dark/60 text-sm mb-8">
@@ -402,7 +397,7 @@ const SpeakerCard = ({ speaker, index }) => {
         <img
           src={speaker.photo}
           alt={displayName}
-          className="w-full h-full object-contain group-hover:scale-105 transition duration-500"
+          className="w-full h-full object-cover object-top group-hover:scale-105 transition duration-500"
         />
         <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-brand-card to-transparent" />
       </div>
@@ -633,6 +628,19 @@ const testimonials = [
     tag: 'Lagos · 2024 edition',
     accent: 'border-brand-rose',
     quoteColor: 'text-brand-rose/30',
+  },
+  const testimonials = [
+  {
+    quote: `We met at Singles Connect, during one of the group session where we were paired together with other participants. What began as a simple, unplanned conversation soon stood out to both of us. After that session, we exchanged contacts, and from that day onward, we kept talking. One conversation led to another, and gradually, what started casually grew into something deeper and more intentional. 
+
+    Over time, it became clear that this wasn’t just a connection; it was direction. A friendship rooted in trust slowly matured into love, and with prayer, clarity, and conviction, we chose each other for life.
+    
+    Today, we are married. Looking back, we see God’s hand in every step, from that first meeting at Singles Connect to this new chapter we now share as husband and wife.
+    `,
+    name: Kingsley & Tolu,
+    tag: 'Ibadan · 2022 edition',
+    accent: 'border-brand-gold',
+    quoteColor: 'text-brand-gold/30',
   },
 ];
 
