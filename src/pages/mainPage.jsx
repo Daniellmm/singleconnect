@@ -13,6 +13,7 @@ import Ire from '../assets/ire.png';
 import Orobs from '../assets/orob.png';
 import Peapen from '../assets/peap.png';
 import Solid from '../assets/solid.png';
+import Metro from '../assets/metro.png';
 
 
 import {
@@ -964,7 +965,7 @@ const partners = [
   { name: 'Ire Ayo Crown', category: 'Food Enterprise', logo: Ire },
   { name: 'Orobs Photography', category: 'Media', logo: Orobs },
   { name: 'PEAPEN Travels Nigeria', category: 'Travel and Study Agency', logo: Peapen },
-  { name: 'Metro Meet', category: 'NGO' },
+  { name: 'Metro Meet', category: 'NGO', logo: Metro },
   { name: 'Solid Imaginations Contractors Ltd', category: 'Construction', logo: Solid },
 ];
 
