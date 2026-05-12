@@ -1329,7 +1329,7 @@ const faqs = [
   },
   {
     q: 'Where exactly is the event held?',
-    a: 'The final venue will be announced soon. Confirmed options are within Ibadan. Register and we\'ll send you the details directly.',
+    a: 'Race Course Lounge Gate 1, Adamasigba Stadium, Ibadan.',
   },
   {
     q: 'Can I come with a friend?',
