@@ -11,7 +11,7 @@ import RevSte  from '../assets/stella.jpg';
 import Access from '../assets/access.png';
 import Ire from '../assets/ire.png';
 import Orobs from '../assets/orob.png';
-import Peapen from '../assets/peap.png';
+import Tee from '../assets/tee.png';
 import Solid from '../assets/solid.png';
 import Metro from '../assets/metro.png';
 
@@ -964,7 +964,7 @@ const partners = [
   { name: 'Access Bank', category: 'Banking & Finance', logo: Access },
   { name: 'Ire Ayo Crown', category: 'Food Enterprise', logo: Ire },
   { name: 'Orobs Photography', category: 'Media', logo: Orobs },
-  { name: 'PEAPEN Travels Nigeria', category: 'Travel and Study Agency', logo: Peapen },
+  { name: 'The Scripted Tee', category: 'Clothing Brand', logo: Tee },
   { name: 'Metro Meet', category: 'NGO', logo: Metro },
   { name: 'Solid Imaginations Contractors Ltd', category: 'Construction', logo: Solid },
 ];
